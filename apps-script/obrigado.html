@@ -1,0 +1,54 @@
+<!--
+  PÁGINA DE OBRIGADO (successUrl do Asaas, pós-pagamento). Clean / clara, autossuficiente.
+  - Mesmo domínio dos dados comerciais do Asaas (ex.: https://agconsultorialtda.com/obrigado).
+  - Dispara o evento Purchase no Meta Pixel (já presente no site).
+  - Fonte de verdade da venda = status "pago" no Sheets (webhook), não este Pixel.
+  >>> TROCAR: href do botão pelo link do grupo de WhatsApp da turma. <<<
+-->
+<style>
+  .alg-obg {
+    --accent:#E8B23A; --accent-ink:#3a2b06; --ok:#1f9d57;
+    --text:#1f2430; --muted:#6b7280; --border:#e2e4ec;
+    font: inherit; color: var(--text);
+    min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 48px 24px;
+  }
+  .alg-obg .card {
+    max-width: 480px; width: 100%; text-align: center; background: #fff;
+    border: 1px solid var(--border); border-radius: 18px; padding: 40px 32px;
+    box-shadow: 0 14px 40px rgba(20,20,30,.10);
+  }
+  .alg-obg .check {
+    width: 64px; height: 64px; border-radius: 50%; background: #e8f6ee; color: var(--ok);
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+  }
+  .alg-obg h1 { font-size: 26px; font-weight: 800; margin: 0 0 10px; letter-spacing: -.01em; }
+  .alg-obg p { color: var(--muted); font-size: 15px; line-height: 1.6; margin: 0 0 8px; }
+  .alg-obg .meta { font-size: 14px; color: var(--text); background: #f6f7f9;
+    border-radius: 10px; padding: 12px 14px; margin: 18px 0; }
+  .alg-obg .ic { display: inline-block; vertical-align: -3px; color: #b9851f; margin-right: 5px; }
+  .alg-obg .btn { display: inline-block; margin-top: 14px; padding: 14px 26px; border-radius: 10px;
+    background: var(--accent); color: var(--accent-ink); font-weight: 700; text-decoration: none; }
+</style>
+
+<div class="alg-obg">
+  <div class="card">
+    <div class="check">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    </div>
+    <h1>Inscrição confirmada!</h1>
+    <p>Bem-vindo(a) à turma 2026 de <b>O Algoritmo da Liderança</b>.</p>
+    <div class="meta">
+      <span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>Campina Grande/PB (Catolé)
+      &nbsp;·&nbsp;
+      <span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>início 01/08/2026
+    </div>
+    <p>Mantenha contato no WhatsApp:</p>
+    <a class="btn" href="https://wa.me/5583999661686" target="_blank" rel="noopener">Falar no WhatsApp</a>
+  </div>
+</div>
+
+<script>
+  if (window.fbq) {
+    fbq('track', 'Purchase', { content_name: 'Algoritmo da Lideranca', currency: 'BRL', value: 1670.00 });
+  }
+</script>

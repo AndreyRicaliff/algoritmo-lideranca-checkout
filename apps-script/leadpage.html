@@ -1,0 +1,165 @@
+<!--
+  LEAD PAGE COMPLETA — O Algoritmo da Liderança (clean / clara).
+  Conteúdo + imagens + form de inscrição integrado (Asaas → Google Sheets).
+
+  >>> ANTES DE PUBLICAR <<<
+  1. Form: trocar o action pela URL do Web App do Apps Script.
+  2. Imagens: as de assets/ são os criativos sociais (placeholder visual). Suba as imagens
+     reais da página na Biblioteca de Mídia do WordPress e troque os src.
+  3. Pixel: o site já dispara PageView nativo.
+-->
+<style>
+  .alg {
+    --accent:#E8B23A; --accent-ink:#3a2b06; --text:#1f2430; --muted:#6b7280;
+    --bg:#ffffff; --soft:#f6f7f9; --border:#e2e4ec; --ring:rgba(232,178,58,.25);
+    font: inherit; color: var(--text); background: var(--bg);
+  }
+  .alg * { box-sizing: border-box; }
+  .alg .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  .alg section { padding: 64px 0; }
+  .alg h1 { font-size: clamp(30px,5.5vw,54px); font-weight:800; line-height:1.08; letter-spacing:-.02em; margin:0; }
+  .alg h2 { font-size: clamp(24px,3.5vw,36px); font-weight:700; line-height:1.15; letter-spacing:-.01em; margin:0 0 16px; }
+  .alg p.lead { font-size: clamp(16px,2vw,19px); color: var(--muted); max-width: 58ch; }
+  .alg .gold { color: #b9851f; }
+  .alg .eyebrow { display:inline-block; font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+    color:#b9851f; border:1px solid var(--border); border-radius:999px; padding:6px 14px; margin-bottom:20px; }
+  .alg .badges { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
+  .alg .badge { border:1px solid var(--border); background:var(--soft); border-radius:8px; padding:10px 14px; font-size:14px; }
+  .alg .btn { display:inline-block; padding:15px 28px; border-radius:10px; background:var(--accent);
+    color:var(--accent-ink); font-weight:700; text-decoration:none; border:0; cursor:pointer; transition:filter .15s; }
+  .alg .btn:hover { filter:brightness(.96); }
+  .alg .split { display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center; }
+  .alg .media img { width:100%; border-radius:16px; display:block; box-shadow:0 10px 30px rgba(20,20,30,.12); }
+  .alg .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .alg .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .alg .avatar { width:64px; height:64px; border-radius:50%; background:#fdf7e8; border:1px solid var(--border);
+    color:#b9851f; font-weight:700; font-size:22px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+  .alg .ficon { color:#b9851f; display:block; margin-bottom:12px; }
+  .alg .card { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:24px; }
+  .alg .card .num { color:#b9851f; font-weight:700; font-size:12px; letter-spacing:.1em; }
+  .alg .card h3 { font-size:18px; margin:8px 0; }
+  .alg .card ul { list-style:none; padding:0; margin:10px 0 0; }
+  .alg .card li { position:relative; padding-left:18px; margin:7px 0; color:var(--muted); font-size:15px; }
+  .alg .card li::before { content:'›'; color:var(--accent); position:absolute; left:0; }
+  .alg .soft { background:var(--soft); }
+  .alg .center { text-align:center; }
+  .alg .center .lead { margin-left:auto; margin-right:auto; }
+
+  /* ---- Form ---- */
+  .alg .checkout { max-width:460px; margin:0 auto; background:var(--bg);
+    border:1px solid var(--border); border-radius:18px; padding:28px; box-shadow:0 10px 30px rgba(20,20,30,.08); }
+  .alg .checkout .field { width:100%; padding:13px 14px; margin:8px 0; font:inherit; font-size:15px;
+    color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:10px; transition:border-color .15s, box-shadow .15s; }
+  .alg .checkout .field::placeholder { color:#9aa0ac; }
+  .alg .checkout .field:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 4px var(--ring); }
+  .alg .checkout legend { font-size:13px; color:var(--muted); margin-bottom:4px; }
+  .alg .opt { display:flex; align-items:center; gap:12px; padding:14px; margin:8px 0;
+    border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:border-color .15s, background .15s; }
+  .alg .opt:hover { border-color:#cfd2dc; }
+  .alg .opt:has(input:checked) { border-color:var(--accent); background:#fdf7e8; }
+  .alg .opt input { accent-color:var(--accent); width:18px; height:18px; }
+  .alg .opt .price { font-weight:700; }
+  .alg .consent { display:flex; gap:8px; align-items:flex-start; font-size:13px; color:var(--muted); margin:14px 0; }
+  .alg .consent a { color:#b9851f; }
+  .alg .old { text-decoration: line-through; color:#9aa0ac; font-weight:400; margin-right:6px; }
+  .alg .inaugural { display:inline-block; background:#fdf7e8; color:#b9851f; border:1px solid #f0e2bf;
+    border-radius:999px; padding:6px 12px; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-bottom:14px; }
+  .alg .submit { width:100%; padding:15px; font:inherit; font-size:16px; font-weight:700;
+    color:var(--accent-ink); background:var(--accent); border:0; border-radius:10px; cursor:pointer; transition:filter .15s; }
+  .alg .submit:hover { filter:brightness(.96); }
+
+  @media (max-width:760px){ .alg .split,.alg .grid3,.alg .grid4{ grid-template-columns:1fr; } .alg section{ padding:48px 0; } }
+</style>
+
+<div class="alg">
+
+  <!-- HERO + FORM -->
+  <section>
+    <div class="wrap split" style="align-items:start;grid-template-columns:1.2fr .8fr">
+      <div>
+        <span class="eyebrow">AG Educação · Turma Inaugural 2026</span>
+        <h1 style="font-size:clamp(28px,4.4vw,46px)"><span style="white-space:nowrap">Liderança não é dom.</span><br><span class="gold">É algoritmo.</span></h1>
+        <p class="lead" style="margin-top:18px">A formação de líderes mais completa da região. O método para transformar o gestor que improvisa no líder de alta performance que sua empresa precisa.</p>
+        <div class="badges">
+          <span class="badge">13 módulos</span>
+          <span class="badge">5 encontros presenciais</span>
+          <span class="badge">+15 horas</span>
+          <span class="badge">Campina Grande · 01/08 a 19/09</span>
+        </div>
+      </div>
+
+      <form id="alg-inscricao" class="checkout" method="POST"
+            action="https://script.google.com/macros/s/COLAR_ID_DO_WEBAPP/exec">
+        <div class="inaugural">Turma Inaugural · condição de lançamento</div>
+        <h3 style="font-size:20px;margin:0 0 4px">Garanta sua vaga</h3>
+        <p style="color:var(--muted);font-size:14px;margin:0 0 16px">Vagas limitadas · turma única de 2026</p>
+        <input class="field" name="nome" placeholder="Seu nome" required>
+        <input class="field" name="email" type="email" placeholder="E-mail" required>
+        <input class="field" name="whatsapp" placeholder="WhatsApp (com DDD)" required inputmode="numeric">
+        <input class="field" name="empresa" placeholder="Sua empresa">
+        <input class="field" name="cpfCnpj" placeholder="CPF ou CNPJ" required inputmode="numeric">
+        <fieldset style="border:0;padding:0;margin:14px 0">
+          <legend>Forma de pagamento</legend>
+          <!-- PIX só funciona após a conta Asaas ser aprovada (em análise).
+               Antes da aprovação, quem escolher PIX cai no fallback de WhatsApp. -->
+          <label class="opt"><input type="radio" name="metodo" value="pix" checked>
+            <span>PIX à vista — <span class="old">R$ 2.672</span><span class="price">R$ 1.670</span></span></label>
+          <label class="opt"><input type="radio" name="metodo" value="cartao">
+            <span>Cartão em até 5x — <span class="old">R$ 3.152</span><span class="price">R$ 1.970</span></span></label>
+        </fieldset>
+        <label class="consent"><input type="checkbox" required>
+          <span>Concordo com a <a href="/politica-de-privacidade">Política de Privacidade</a> (LGPD).</span></label>
+        <input type="hidden" name="utm" id="alg-utm">
+        <button type="submit" class="submit">Garantir minha vaga</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- DOR -->
+  <section class="soft">
+    <div class="wrap split">
+      <div class="media"><img src="assets/dor.png" alt="Você é o maior gargalo da sua empresa?"></div>
+      <div>
+        <h2>Sua empresa só cresce até onde <span class="gold">você</span> alcança?</h2>
+        <p class="lead">A maioria das empresas trava no mesmo lugar — não por falta de mercado, mas por falta de líderes preparados ao redor do dono. Enquanto tudo depender de você, sua empresa terá um teto. O problema não é a equipe: é que ninguém ensinou a formar gente que decide sem você.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAIXA / FORMAÇÃO -->
+  <section>
+    <div class="wrap split">
+      <div class="media"><img src="assets/formacao.png" alt="A formação de líderes mais completa da região"></div>
+      <div>
+        <h2>Presencial, com quem lidera na prática</h2>
+        <p class="lead">5 encontros, +15 horas, material e certificado oficial AG. Cada módulo termina com uma aplicação real na sua rotina de liderança — método, não palestra motivacional.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FECHAMENTO -->
+  <section class="soft center">
+    <div class="wrap">
+      <h2>O próximo líder da sua empresa<br>pode estar nesta turma.</h2>
+      <p class="lead">Você não precisa esperar o próximo ciclo de crescimento. Construa-o agora. Turma Inaugural 2026 · 30 vagas · condição de lançamento.</p>
+      <p style="margin-top:18px"><a href="#alg-inscricao" style="color:#b9851f;font-weight:700;text-decoration:none">Preencher inscrição ↑</a></p>
+    </div>
+  </section>
+
+  <div class="wrap center" style="padding:32px 0;color:var(--muted);font-size:13px">
+    AG Consultoria Ltda · O Algoritmo da Liderança · Campina Grande/PB
+  </div>
+</div>
+
+<script>
+  (function () {
+    const form = document.getElementById('alg-inscricao');
+    document.getElementById('alg-utm').value = window.location.search.replace(/^\?/, '');
+    form.addEventListener('submit', function () {
+      if (window.fbq) {
+        fbq('track', 'Lead', { content_name: 'Algoritmo da Lideranca' });
+        fbq('track', 'InitiateCheckout', { content_name: 'Algoritmo da Lideranca' });
+      }
+    });
+  })();
+</script>
