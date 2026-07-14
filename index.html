@@ -1,14 +1,12 @@
-<!--
-  LEAD PAGE COMPLETA — O Algoritmo da Liderança (clean / clara).
-  Conteúdo + imagens + form de inscrição integrado (Asaas → Google Sheets).
-
-  >>> ANTES DE PUBLICAR <<<
-  1. Form: trocar o action pela URL do Web App do Apps Script.
-  2. Imagens: as de assets/ são os criativos sociais (placeholder visual). Suba as imagens
-     reais da página na Biblioteca de Mídia do WordPress e troque os src.
-  3. Pixel: o site já dispara PageView nativo.
--->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O Algoritmo da Liderança — Turma Inaugural 2026 | AG Educação</title>
+<meta name="description" content="A formação de líderes mais completa da região. Turma Inaugural 2026 · Campina Grande · 01/08 a 19/09.">
 <style>
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
   .alg {
     --accent:#E8B23A; --accent-ink:#3a2b06; --text:#1f2430; --muted:#6b7280;
     --bg:#ffffff; --soft:#f6f7f9; --border:#e2e4ec; --ring:rgba(232,178,58,.25);
@@ -25,22 +23,8 @@
     color:#b9851f; border:1px solid var(--border); border-radius:999px; padding:6px 14px; margin-bottom:20px; }
   .alg .badges { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
   .alg .badge { border:1px solid var(--border); background:var(--soft); border-radius:8px; padding:10px 14px; font-size:14px; }
-  .alg .btn { display:inline-block; padding:15px 28px; border-radius:10px; background:var(--accent);
-    color:var(--accent-ink); font-weight:700; text-decoration:none; border:0; cursor:pointer; transition:filter .15s; }
-  .alg .btn:hover { filter:brightness(.96); }
   .alg .split { display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center; }
   .alg .media img { width:100%; border-radius:16px; display:block; box-shadow:0 10px 30px rgba(20,20,30,.12); }
-  .alg .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-  .alg .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-  .alg .avatar { width:64px; height:64px; border-radius:50%; background:#fdf7e8; border:1px solid var(--border);
-    color:#b9851f; font-weight:700; font-size:22px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
-  .alg .ficon { color:#b9851f; display:block; margin-bottom:12px; }
-  .alg .card { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:24px; }
-  .alg .card .num { color:#b9851f; font-weight:700; font-size:12px; letter-spacing:.1em; }
-  .alg .card h3 { font-size:18px; margin:8px 0; }
-  .alg .card ul { list-style:none; padding:0; margin:10px 0 0; }
-  .alg .card li { position:relative; padding-left:18px; margin:7px 0; color:var(--muted); font-size:15px; }
-  .alg .card li::before { content:'›'; color:var(--accent); position:absolute; left:0; }
   .alg .soft { background:var(--soft); }
   .alg .center { text-align:center; }
   .alg .center .lead { margin-left:auto; margin-right:auto; }
@@ -68,8 +52,10 @@
     color:var(--accent-ink); background:var(--accent); border:0; border-radius:10px; cursor:pointer; transition:filter .15s; }
   .alg .submit:hover { filter:brightness(.96); }
 
-  @media (max-width:760px){ .alg .split,.alg .grid3,.alg .grid4{ grid-template-columns:1fr; } .alg section{ padding:48px 0; } }
+  @media (max-width:760px){ .alg .split{ grid-template-columns:1fr; } .alg section{ padding:48px 0; } }
 </style>
+</head>
+<body>
 
 <div class="alg">
 
@@ -111,7 +97,7 @@
           </div>
         </fieldset>
         <label class="consent"><input type="checkbox" required>
-          <span>Concordo com a <a href="/politica-de-privacidade">Política de Privacidade</a> (LGPD).</span></label>
+          <span>Concordo com a <a href="apps-script/politica-de-privacidade.html">Política de Privacidade</a> (LGPD).</span></label>
         <input type="hidden" name="utm" id="alg-utm">
         <button type="submit" class="submit">Garantir minha vaga</button>
       </form>
@@ -121,7 +107,7 @@
   <!-- DOR -->
   <section class="soft">
     <div class="wrap split">
-      <div class="media"><img src="assets/dor.png" alt="Você é o maior gargalo da sua empresa?"></div>
+      <div class="media"><img src="apps-script/assets/dor.png" alt="Você é o maior gargalo da sua empresa?" loading="lazy"></div>
       <div>
         <h2>Sua empresa só cresce até onde <span class="gold">você</span> alcança?</h2>
         <p class="lead">A maioria das empresas trava no mesmo lugar — não por falta de mercado, mas por falta de líderes preparados ao redor do dono. Enquanto tudo depender de você, sua empresa terá um teto. O problema não é a equipe: é que ninguém ensinou a formar gente que decide sem você.</p>
@@ -132,7 +118,7 @@
   <!-- FAIXA / FORMAÇÃO -->
   <section>
     <div class="wrap split">
-      <div class="media"><img src="assets/formacao.png" alt="A formação de líderes mais completa da região"></div>
+      <div class="media"><img src="apps-script/assets/formacao.png" alt="A formação de líderes mais completa da região" loading="lazy"></div>
       <div>
         <h2>Presencial, com quem lidera na prática</h2>
         <p class="lead">5 encontros, +15 horas, material e certificado oficial AG. Cada módulo termina com uma aplicação real na sua rotina de liderança — método, não palestra motivacional.</p>
@@ -203,3 +189,6 @@
     onMetodo();
   })();
 </script>
+
+</body>
+</html>
