@@ -117,9 +117,11 @@ function corpoCobranca(customerId, d) {
     customer: customerId,
     dueDate: vencimento(),
     description: 'Inscrição – Algoritmo da Liderança (Turma 2026)',
-    externalReference: d.email,
-    callback: { successUrl: prop('SUCCESS_URL'), autoRedirect: true }
+    externalReference: d.email
   };
+  // Asaas só aceita callback.successUrl com um site/domínio cadastrado na conta; sem isso derruba a cobrança.
+  const successUrl = prop('SUCCESS_URL');
+  if (successUrl) base.callback = { successUrl: successUrl, autoRedirect: true };
   if (d.metodo === 'cartao') {
     base.billingType = 'CREDIT_CARD';
     const total = totalCartao(d.parcelas); // já com a taxa da faixa repassada ao cliente

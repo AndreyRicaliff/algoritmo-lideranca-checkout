@@ -45,8 +45,10 @@ function corpoCobranca(customerId, d, successUrl) {
     dueDate: process.env.CHECKOUT_DUE_DATE || '2026-07-31',
     description: 'Inscrição – Algoritmo da Liderança (Turma 2026)',
     externalReference: d.email,
-    callback: { successUrl: successUrl, autoRedirect: true },
   };
+  // Asaas só aceita callback.successUrl se a conta tiver um site/domínio cadastrado
+  // (Minha Conta -> Informações). Sem domínio, mandar callback derruba a cobrança.
+  if (successUrl) base.callback = { successUrl: successUrl, autoRedirect: true };
   if (d.metodo === 'cartao') {
     base.billingType = 'CREDIT_CARD';
     const total = totalCartao(d.parcelas); // já com a taxa da faixa repassada ao cliente
@@ -100,9 +102,8 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const proto = req.headers['x-forwarded-proto'] || 'https';
-  const host = req.headers['x-forwarded-host'] || req.headers.host;
-  const successUrl = process.env.SUCCESS_URL || (proto + '://' + host + '/apps-script/obrigado.html');
+  // Redirect pós-pagamento só se SUCCESS_URL estiver setada (requer domínio cadastrado no Asaas).
+  const successUrl = process.env.SUCCESS_URL || '';
 
   try {
     const cliente = await asaas('/customers', {
