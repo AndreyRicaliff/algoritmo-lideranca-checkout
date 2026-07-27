@@ -25,5 +25,9 @@
   local. Corrigir com um `package.json` `{"type":"commonjs"}` na raiz — mudança de build, merece
   deploy próprio, fora da janela de lançamento.
 - **2026-07-27 — Endpoint público sem rate limit.** `POST /api/inscrever` cria cliente + cobrança
-  na conta de produção sem nenhum limite; como o acompanhamento é feito pelo painel do Asaas,
-  spam polui a única fonte de verdade do lançamento.
+  na conta de produção sem nenhum limite, e não há CAPTCHA, honeypot nem idempotência. Confirmado
+  por revisão adversarial: um laço de POSTs com CPFs válidos (triviais de gerar) enche o painel de
+  clientes e cobranças reais. O Asaas rejeita CPF com dígito verificador inválido, o que barra
+  lixo trivial, mas não um ataque com CPFs bem-formados. Como o acompanhamento do lançamento é
+  feito pelo painel do Asaas, spam polui a única fonte de verdade. Mitigação: rate limit por IP +
+  honeypot no form + validar dígito verificador antes de chamar o Asaas.
