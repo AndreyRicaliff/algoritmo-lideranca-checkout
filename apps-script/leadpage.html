@@ -215,7 +215,7 @@
       const p = tabela.parcelas[(parseInt(sel.value, 10) || 1) - 1];
       if (!p) return;
       visto.value = p.total; // o backend recusa se o lote virar entre carregar e enviar
-      const pct = (p.taxa * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+      const pct = (p.taxa * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       info.textContent = p.n === 1
         ? ('Cartão à vista: ' + brl(p.total) + ' · taxas ' + pct + '%')
         : (p.n + '× de ' + brl(p.parcela) + ' · total ' + brl(p.total) + ' · taxas ' + pct + '%');
