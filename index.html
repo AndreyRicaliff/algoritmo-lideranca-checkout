@@ -100,7 +100,7 @@
         <label class="consent"><input type="checkbox" required>
           <span>Concordo com a <a href="apps-script/politica-de-privacidade.html">Política de Privacidade</a> (LGPD).</span></label>
         <input type="hidden" name="utm" id="alg-utm">
-        <input type="hidden" name="precoVisto" id="alg-preco-visto">
+        <input type="hidden" name="precoVisto" id="alg-preco-visto" value="indisponivel">
         <button type="submit" class="submit">Garantir minha vaga</button>
       </form>
     </div>
@@ -196,7 +196,7 @@
     function refresh() {
       if (!tabela) return;
       const cartao = document.querySelector('input[name=metodo]:checked').value === 'cartao';
-      if (!cartao) { visto.value = tabela.base; return; }
+      if (!cartao) { visto.value = tabela.base; return; } // declara ao backend o que foi exibido
       const p = tabela.parcelas[(parseInt(sel.value, 10) || 1) - 1];
       if (!p) return;
       visto.value = p.total; // o backend recusa se o lote virar entre carregar e enviar

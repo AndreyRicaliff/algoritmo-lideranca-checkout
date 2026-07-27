@@ -86,7 +86,7 @@ function lerCampos(p) {
     metodo: ['cartao', 'boleto', 'pix'].indexOf(p.metodo) >= 0 ? p.metodo : 'pix',
     parcelas: preco.clampParcelas(p.parcelas),
     utm: (p.utm || '').trim().slice(0, 200),
-    precoVisto: parseFloat(p.precoVisto),
+    precoVisto: (p.precoVisto == null ? '' : String(p.precoVisto)).trim(),
   };
 }
 
@@ -98,12 +98,17 @@ function invalido(d) {
   return null;
 }
 
-// O comprador vê o preço na página; o lote pode virar entre o carregamento e o envio.
-// Cobrar diferente do que foi exibido é o pior desfecho possível — melhor pedir recarga.
+// O comprador vê o preço na página e o lote pode virar entre o carregamento e o envio.
+// Cobrar diferente do que foi exibido é o pior desfecho possível, então o form declara o que
+// mostrou. Campo ausente = página anterior a este deploy, que exibia preço fixo sem declarar
+// nada: essa é justamente a que mostra o valor errado depois da virada, então pede recarga.
+// 'indisponivel' = front atual que não conseguiu carregar a tabela e não exibiu preço nenhum.
 function precoDivergente(d, base) {
-  if (!isFinite(d.precoVisto)) return false; // front antigo/cacheado não manda: não bloqueia
+  if (d.precoVisto === 'indisponivel') return false;
+  const visto = parseFloat(d.precoVisto);
+  if (!isFinite(visto)) return true;
   const esperado = d.metodo === 'cartao' ? preco.totalCartao(d.parcelas, base) : base;
-  return Math.abs(esperado - d.precoVisto) > 0.01;
+  return Math.abs(esperado - visto) > 0.01;
 }
 
 module.exports = async function handler(req, res) {
