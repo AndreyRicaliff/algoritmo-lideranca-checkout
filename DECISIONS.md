@@ -1,0 +1,45 @@
+# Decisões — Checkout Algoritmo da Liderança
+
+## 2026-07-27 — [preço] Fonte única de preço em vez de constante replicada
+**Problema:** a 2ª turma tem preço que muda por data (R$ 1.280,50 até 31/07, R$ 1.977,00 a partir
+de 01/08). O preço vivia duplicado em 4 arquivos (dois backends e dois fronts).
+**Opções:** (A) editar a regra de lote nos 4 lugares; (B) módulo único no backend + endpoint que
+o front consome; (C) renderizar o preço no HTML em build time.
+**Decisão:** (B) — `lib/preco.js` como fonte única, exposto por `GET /api/preco`; o front deixou
+de calcular preço e passou a exibir o que a API devolve.
+**Por quê:** com preço fixo, duplicação é dívida estética. Com virada por data, ela vira cobrança
+errada: front e backend podem discordar sobre qual lote está valendo. (C) não serve porque o site
+é estático — o HTML publicado hoje seguiria mostrando o lote 1 depois da virada.
+**Consequências:** o front depende de uma chamada de rede para exibir preço (degrada para
+"consulte" se falhar, sem bloquear a inscrição). O `apps-script/Codigo.gs` foi marcado como
+DESATIVADO em vez de sincronizado — manter dois backends com a mesma regra de preço reintroduz
+exatamente o drift que esta decisão elimina.
+**Em entrevista (30s):** "Preço que muda por data não pode ser constante duplicada. Centralizei
+num módulo, expus por endpoint e fiz o front mandar de volta o preço que exibiu, pro backend
+recusar a cobrança se tiver divergido."
+
+## 2026-07-27 — [preço] Virada de lote no fuso de Brasília, não no relógio do runtime
+**Problema:** decidir qual lote vale exige comparar "hoje" com a data de corte.
+**Opções:** (A) `new Date()` do runtime; (B) `Intl.DateTimeFormat` fixando `America/Sao_Paulo`.
+**Decisão:** (B), comparando strings `YYYY-MM-DD` (lexicográfica = cronológica).
+**Por quê:** o runtime do Vercel roda em UTC. Em UTC a virada aconteceria à meia-noite UTC do
+dia 01/08, que é **21h de 31/07 em Brasília** — as últimas três horas do lote promocional
+cobrariam R$ 1.977,00 de quem viu R$ 1.280,50.
+**Consequências:** toda data do domínio (lote, vencimento) passa pelo mesmo formatador.
+**Em entrevista (30s):** "Data de corte comercial é fuso do negócio, não do servidor."
+
+## 2026-07-27 — [preço] Antecipação repassada por gross-up linear, parametrizada por env var
+**Problema:** repassar ao cliente a taxa de antecipação (receber em D+2 em vez de D+30 por
+parcela), somada ao MDR, sem que a AG receba menos que a base.
+**Opções:** (A) markup `base × (1+taxa)`; (B) gross-up `base / (1-taxa)`; (C) absorver.
+**Decisão:** (B), com a taxa combinada = MDR da faixa + antecipação × meses adiantados, onde a
+parcela k adianta (30k−2)/30 meses → fator médio (N+1)/2 − 1/15.
+**Por quê:** markup não recompõe o valor descontado (o Asaas cobra sobre o total cobrado, não
+sobre a base) e a AG receberia menos que R$ 1.977,00. O gross-up foi verificado nos 10
+parcelamentos × 2 lotes: líquido bate na casa do centavo.
+**Consequências:** a taxa combinada chega a ~14,8% em 10x, o que encarece a parcela de forma
+visível. A taxa de antecipação vive em `ASAAS_ANTECIPACAO_AM` (default 1,99% a.m.) — **valor
+ainda não confirmado no extrato do Asaas**; há um teto de sanidade de 35% que aborta em vez de
+cobrar um preço absurdo por env var errada.
+**Em entrevista (30s):** "Repasse de taxa é gross-up, não markup: divide pela taxa complementar,
+senão você recupera menos do que pagou."

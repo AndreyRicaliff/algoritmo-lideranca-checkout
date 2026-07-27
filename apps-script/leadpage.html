@@ -1,9 +1,10 @@
 <!--
-  LEAD PAGE COMPLETA — O Algoritmo da Liderança (clean / clara).
-  Conteúdo + imagens + form de inscrição integrado (Asaas → Google Sheets).
+  LEAD PAGE COMPLETA — O Algoritmo da Liderança, 2ª turma (18, 19 e 20 de setembro de 2026).
+  Versão para colar no WordPress. O pagamento roda no serverless do Vercel (Asaas).
 
   >>> ANTES DE PUBLICAR <<<
-  1. Form: trocar o action pela URL do Web App do Apps Script.
+  1. Preço e parcelas vêm de https://algoritmo-lideranca-lead.vercel.app/api/preco —
+     não editar valores aqui: a regra de lote/taxa vive em lib/preco.js (fonte única).
   2. Imagens: as de assets/ são os criativos sociais (placeholder visual). Suba as imagens
      reais da página na Biblioteca de Mídia do WordPress e troque os src.
   3. Pixel: o site já dispara PageView nativo.
@@ -77,22 +78,22 @@
   <section>
     <div class="wrap split" style="align-items:start;grid-template-columns:1.2fr .8fr">
       <div>
-        <span class="eyebrow">AG Educação · Turma Inaugural 2026</span>
+        <span class="eyebrow">AG Educação · 2ª Turma 2026</span>
         <h1 style="font-size:clamp(28px,4.4vw,46px)"><span style="white-space:nowrap">Liderança não é dom.</span><br><span class="gold">É algoritmo.</span></h1>
         <p class="lead" style="margin-top:18px">A formação de líderes mais completa da região. O método para transformar o gestor que improvisa no líder de alta performance que sua empresa precisa.</p>
         <div class="badges">
           <span class="badge">13 módulos</span>
-          <span class="badge">5 encontros presenciais</span>
+          <span class="badge">3 dias intensivos</span>
           <span class="badge">+15 horas</span>
-          <span class="badge">Campina Grande · 01/08 a 19/09</span>
+          <span class="badge">Campina Grande · 18, 19 e 20 de setembro</span>
         </div>
       </div>
 
       <form id="alg-inscricao" class="checkout" method="POST"
-            action="https://script.google.com/macros/s/COLAR_ID_DO_WEBAPP/exec">
-        <div class="inaugural">Turma Inaugural · condição de lançamento</div>
+            action="https://algoritmo-lideranca-lead.vercel.app/api/inscrever">
+        <div class="inaugural">2ª Turma · 18 a 20 de setembro</div>
         <h3 style="font-size:20px;margin:0 0 4px">Garanta sua vaga</h3>
-        <p style="color:var(--muted);font-size:14px;margin:0 0 16px">Vagas limitadas · turma única de 2026</p>
+        <p style="color:var(--muted);font-size:14px;margin:0 0 16px">Vagas limitadas · Campina Grande</p>
         <input class="field" name="nome" placeholder="Seu nome" required>
         <input class="field" name="email" type="email" placeholder="E-mail" required>
         <input class="field" name="whatsapp" placeholder="WhatsApp (com DDD)" required inputmode="numeric">
@@ -101,7 +102,7 @@
         <fieldset style="border:0;padding:0;margin:14px 0">
           <legend>Forma de pagamento</legend>
           <label class="opt"><input type="radio" name="metodo" value="pix" checked>
-            <span>PIX à vista — <span class="old">R$ 2.672</span><span class="price">R$ 1.280,50</span></span></label>
+            <span>PIX à vista — <span class="old" id="alg-pix-old"></span><span class="price" id="alg-pix">carregando…</span></span></label>
           <label class="opt"><input type="radio" name="metodo" value="cartao">
             <span>Cartão de crédito — <span class="price" id="alg-cartao-hint">à vista ou parcelado</span></span></label>
           <div id="alg-parcelas-wrap" style="display:none;margin:2px 2px 0">
@@ -109,10 +110,12 @@
             <select class="field" name="parcelas" id="alg-parcelas" style="margin:0"></select>
             <p id="alg-parcelas-info" style="font-size:13px;color:var(--muted);margin:8px 2px 0"></p>
           </div>
+          <p id="alg-lote-aviso" style="font-size:13px;color:#b9851f;margin:10px 2px 0"></p>
         </fieldset>
         <label class="consent"><input type="checkbox" required>
           <span>Concordo com a <a href="/politica-de-privacidade">Política de Privacidade</a> (LGPD).</span></label>
         <input type="hidden" name="utm" id="alg-utm">
+        <input type="hidden" name="precoVisto" id="alg-preco-visto">
         <button type="submit" class="submit">Garantir minha vaga</button>
       </form>
     </div>
@@ -135,7 +138,7 @@
       <div class="media"><img src="assets/formacao.png" alt="A formação de líderes mais completa da região"></div>
       <div>
         <h2>Presencial, com quem lidera na prática</h2>
-        <p class="lead">5 encontros, +15 horas, material e certificado oficial AG. Cada módulo termina com uma aplicação real na sua rotina de liderança — método, não palestra motivacional.</p>
+        <p class="lead">3 dias intensivos, +15 horas, material e certificado oficial AG. Cada módulo termina com uma aplicação real na sua rotina de liderança — método, não palestra motivacional.</p>
       </div>
     </div>
   </section>
@@ -144,7 +147,7 @@
   <section class="soft center">
     <div class="wrap">
       <h2>O próximo líder da sua empresa<br>pode estar nesta turma.</h2>
-      <p class="lead">Você não precisa esperar o próximo ciclo de crescimento. Construa-o agora. Turma Inaugural 2026 · 30 vagas · condição de lançamento.</p>
+      <p class="lead">Você não precisa esperar o próximo ciclo de crescimento. Construa-o agora. 2ª Turma 2026 · 18, 19 e 20 de setembro · 30 vagas.</p>
       <p style="margin-top:18px"><a href="#alg-inscricao" style="color:#b9851f;font-weight:700;text-decoration:none">Preencher inscrição ↑</a></p>
     </div>
   </section>
@@ -165,41 +168,68 @@
       }
     });
 
-    // ---- Preço do cartão: taxa Asaas repassada ao cliente por faixa (gross-up) ----
-    // Espelha o backend (Codigo.gs): base R$ 1.280,50; total = base / (1 - taxa).
-    const BASE = 1280.50, MAX = 10;
-    const taxa = p => p <= 1 ? 0.0299 : (p <= 6 ? 0.0349 : 0.0399);
-    const cent = v => Math.round(v * 100) / 100;
-    const total = p => cent(BASE / (1 - taxa(p)));
+    // ---- Preço: vem da API, a MESMA regra que gera a cobrança ----
+    // O lote vira por data (fuso de Brasília) e o relógio do visitante não é confiável:
+    // calcular preço aqui abriria a janela de exibir um valor e cobrar outro.
+    const API = 'https://algoritmo-lideranca-lead.vercel.app/api/preco';
     const brl = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const diaBR = iso => iso.slice(8, 10) + '/' + iso.slice(5, 7);
 
     const sel = document.getElementById('alg-parcelas');
-    for (let p = 1; p <= MAX; p++) {
-      const t = total(p), o = document.createElement('option');
-      o.value = p;
-      o.textContent = p === 1 ? ('À vista — ' + brl(t)) : (p + 'x de ' + brl(cent(t / p)));
-      sel.appendChild(o);
-    }
     const wrap = document.getElementById('alg-parcelas-wrap');
     const info = document.getElementById('alg-parcelas-info');
     const hint = document.getElementById('alg-cartao-hint');
-    hint.textContent = 'a partir de ' + brl(cent(total(MAX) / MAX)) + '/mês';
+    const aviso = document.getElementById('alg-lote-aviso');
+    const visto = document.getElementById('alg-preco-visto');
+    let tabela = null;
+
+    function aplicar(t) {
+      tabela = t;
+      document.getElementById('alg-pix').textContent = brl(t.base);
+      if (t.proximaBase && t.ate) {
+        document.getElementById('alg-pix-old').textContent = brl(t.proximaBase);
+        aviso.textContent = 'Valor garantido até ' + diaBR(t.ate) + '. A partir de '
+          + diaBR(t.proximoInicio) + ': ' + brl(t.proximaBase) + '.';
+      }
+      t.parcelas.forEach(function (p) {
+        const o = document.createElement('option');
+        o.value = p.n;
+        o.textContent = p.n === 1 ? ('À vista — ' + brl(p.total)) : (p.n + 'x de ' + brl(p.parcela));
+        sel.appendChild(o);
+      });
+      const ult = t.parcelas[t.parcelas.length - 1];
+      hint.textContent = 'até ' + ult.n + 'x de ' + brl(ult.parcela);
+      onMetodo();
+    }
+
+    function indisponivel() {
+      document.getElementById('alg-pix').textContent = 'consulte';
+      hint.textContent = 'à vista ou parcelado';
+      aviso.textContent = 'Não foi possível carregar os valores agora — eles aparecem na próxima tela, antes de você pagar.';
+    }
 
     function refresh() {
-      const p = parseInt(sel.value, 10) || 1, t = total(p);
-      const pct = (taxa(p) * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-      info.textContent = p === 1
-        ? ('Cartão à vista: ' + brl(t) + ' · taxa ' + pct + '%')
-        : (p + '× de ' + brl(cent(t / p)) + ' · total ' + brl(t) + ' · taxa ' + pct + '%');
+      if (!tabela) return;
+      const cartao = document.querySelector('input[name=metodo]:checked').value === 'cartao';
+      if (!cartao) { visto.value = tabela.base; return; }
+      const p = tabela.parcelas[(parseInt(sel.value, 10) || 1) - 1];
+      if (!p) return;
+      visto.value = p.total; // o backend recusa se o lote virar entre carregar e enviar
+      const pct = (p.taxa * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+      info.textContent = p.n === 1
+        ? ('Cartão à vista: ' + brl(p.total) + ' · taxas ' + pct + '%')
+        : (p.n + '× de ' + brl(p.parcela) + ' · total ' + brl(p.total) + ' · taxas ' + pct + '%');
     }
+
     function onMetodo() {
       const cartao = document.querySelector('input[name=metodo]:checked').value === 'cartao';
       wrap.style.display = cartao ? 'block' : 'none';
       sel.disabled = !cartao;
-      if (cartao) refresh();
+      refresh();
     }
+
     document.querySelectorAll('input[name=metodo]').forEach(r => r.addEventListener('change', onMetodo));
     sel.addEventListener('change', refresh);
-    onMetodo();
+    fetch(API).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(aplicar).catch(indisponivel);
   })();
 </script>

@@ -1,26 +1,19 @@
 // Vercel Serverless Function — cria cliente + cobrança no Asaas e redireciona pro checkout.
-// Porta a lógica testada do Apps Script (apps-script/Codigo.gs) pro runtime do Vercel.
 // A chave Asaas vive SÓ em env var (nunca no front/repo): definir no painel Vercel.
+// Preço, lote e taxas vêm de lib/preco.js — o mesmo módulo que alimenta o front.
 //
 // Env vars (Settings -> Environment Variables):
-//   ASAAS_API_KEY      (obrigatória)  chave $aact_... — use a de SANDBOX para testar
-//   ASAAS_AMBIENTE     'producao' | 'sandbox' (default sandbox)
-//   SUCCESS_URL        (opcional) página pós-pagamento; default /apps-script/obrigado.html
-//   WHATSAPP_FALLBACK  (opcional) pra onde mandar se a cobrança falhar
-//   CHECKOUT_DUE_DATE  (opcional) vencimento YYYY-MM-DD (default 2026-07-31)
+//   ASAAS_API_KEY          (obrigatória)  chave $aact_... — use a de SANDBOX para testar
+//   ASAAS_AMBIENTE         'producao' | 'sandbox' (default sandbox)
+//   ASAAS_ANTECIPACAO_AM   taxa de antecipação ao mês em fração (ex: 0.0199). 0 desliga.
+//   SUCCESS_URL            (opcional) pós-pagamento; só funciona com domínio cadastrado no Asaas
+//   WHATSAPP_FALLBACK      (opcional) pra onde mandar se a cobrança falhar
+//   CHECKOUT_DUE_DATE      (opcional) trava o vencimento numa data; default = hoje + 3 dias
 
-const PRECO_BASE = 1280.50;   // líquido que a AG quer receber (PIX à vista, base do cartão)
-const MAX_PARCELAS = 10;
-const TAXA_AVISTA = 0.0299;   // 1x
-const TAXA_2_6 = 0.0349;      // 2 a 6 parcelas
-const TAXA_7_12 = 0.0399;     // 7 a 12 parcelas
+const preco = require('../lib/preco.js');
 
-function taxaCartao(p) { return p <= 1 ? TAXA_AVISTA : (p <= 6 ? TAXA_2_6 : TAXA_7_12); }
-function centavos(v) { return Math.round(v * 100) / 100; }
-// Gross-up: cliente paga X tal que, após o Asaas descontar a taxa sobre o total, a AG receba PRECO_BASE.
-function totalCartao(p) { return centavos(PRECO_BASE / (1 - taxaCartao(p))); }
-function digitos(v) { return (v || '').replace(/\D/g, ''); }
-function clampParcelas(v) { const n = parseInt(v, 10); return (isNaN(n) || n < 1) ? 1 : Math.min(n, MAX_PARCELAS); }
+const DESCRICAO = 'Inscrição – Algoritmo da Liderança (2ª turma · 18 a 20/09/2026)';
+const DIAS_VENCIMENTO = 3;
 
 function baseUrl() {
   return process.env.ASAAS_AMBIENTE === 'producao'
@@ -39,33 +32,37 @@ async function asaas(path, payload) {
   return body;
 }
 
-function corpoCobranca(customerId, d, successUrl) {
-  const base = {
+function digitos(v) {
+  return (v || '').replace(/\D/g, '');
+}
+
+function corpoCobranca(customerId, d, base) {
+  const corpo = {
     customer: customerId,
-    dueDate: process.env.CHECKOUT_DUE_DATE || '2026-07-31',
-    description: 'Inscrição – Algoritmo da Liderança (Turma 2026)',
+    // Vencimento relativo: data fixa nasce vencida assim que a turma vira de mês.
+    dueDate: process.env.CHECKOUT_DUE_DATE || preco.vencimentoEm(DIAS_VENCIMENTO),
+    description: DESCRICAO,
     externalReference: d.email,
   };
-  // Asaas só aceita callback.successUrl se a conta tiver um site/domínio cadastrado
-  // (Minha Conta -> Informações). Sem domínio, mandar callback derruba a cobrança.
-  if (successUrl) base.callback = { successUrl: successUrl, autoRedirect: true };
-  if (d.metodo === 'cartao') {
-    base.billingType = 'CREDIT_CARD';
-    const total = totalCartao(d.parcelas); // já com a taxa da faixa repassada ao cliente
-    if (d.parcelas <= 1) {
-      base.value = total;                  // à vista (1x)
-    } else {
-      base.installmentCount = d.parcelas;  // Asaas divide o total nas parcelas
-      base.totalValue = total;             // cliente paga o total; AG recebe o PRECO_BASE líquido
-    }
-  } else if (d.metodo === 'boleto') {
-    base.billingType = 'BOLETO';
-    base.value = PRECO_BASE;
-  } else {
-    base.billingType = 'PIX';
-    base.value = PRECO_BASE; // AG absorve a taxa do PIX
+  // O Asaas só aceita callback.successUrl com um site cadastrado na conta (Minha Conta ->
+  // Informações). Sem domínio, mandar callback derruba a cobrança inteira.
+  if (process.env.SUCCESS_URL) {
+    corpo.callback = { successUrl: process.env.SUCCESS_URL, autoRedirect: true };
   }
-  return base;
+  if (d.metodo !== 'cartao') {
+    corpo.billingType = d.metodo === 'boleto' ? 'BOLETO' : 'PIX';
+    corpo.value = base; // à vista sem cartão: a AG absorve a taxa
+    return corpo;
+  }
+  corpo.billingType = 'CREDIT_CARD';
+  const total = preco.totalCartao(d.parcelas, base); // MDR + antecipação já repassados
+  if (d.parcelas <= 1) {
+    corpo.value = total;
+  } else {
+    corpo.installmentCount = d.parcelas; // o Asaas divide o total nas parcelas
+    corpo.totalValue = total;            // cliente paga o total; a AG recebe a base líquida
+  }
+  return corpo;
 }
 
 async function readBody(req) {
@@ -79,44 +76,68 @@ async function readBody(req) {
   return Object.fromEntries(new URLSearchParams(raw)); // application/x-www-form-urlencoded
 }
 
-module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
-
-  const p = await readBody(req);
-  const d = {
+function lerCampos(p) {
+  return {
     nome: (p.nome || '').trim(),
     email: (p.email || '').trim(),
     whatsapp: digitos(p.whatsapp),
     empresa: (p.empresa || '').trim(),
     cpfCnpj: digitos(p.cpfCnpj),
     metodo: ['cartao', 'boleto', 'pix'].indexOf(p.metodo) >= 0 ? p.metodo : 'pix',
-    parcelas: clampParcelas(p.parcelas),
+    parcelas: preco.clampParcelas(p.parcelas),
+    utm: (p.utm || '').trim().slice(0, 200),
+    precoVisto: parseFloat(p.precoVisto),
   };
+}
 
-  if (!d.nome || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email) || d.whatsapp.length < 10 || d.cpfCnpj.length < 11) {
-    res.status(400).send('Dados inválidos. Volte e confira nome, e-mail, WhatsApp (com DDD) e CPF/CNPJ.');
-    return;
-  }
+function invalido(d) {
+  if (!d.nome) return 'Confira seu nome.';
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) return 'E-mail inválido.';
+  if (d.whatsapp.length < 10) return 'WhatsApp inválido — inclua o DDD.';
+  if (d.cpfCnpj.length !== 11 && d.cpfCnpj.length !== 14) return 'CPF/CNPJ inválido.';
+  return null;
+}
+
+// O comprador vê o preço na página; o lote pode virar entre o carregamento e o envio.
+// Cobrar diferente do que foi exibido é o pior desfecho possível — melhor pedir recarga.
+function precoDivergente(d, base) {
+  if (!isFinite(d.precoVisto)) return false; // front antigo/cacheado não manda: não bloqueia
+  const esperado = d.metodo === 'cartao' ? preco.totalCartao(d.parcelas, base) : base;
+  return Math.abs(esperado - d.precoVisto) > 0.01;
+}
+
+module.exports = async function handler(req, res) {
+  if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
+
+  const d = lerCampos(await readBody(req));
+  const erro = invalido(d);
+  if (erro) { res.status(400).send(erro + ' Volte e corrija para continuar.'); return; }
   if (!process.env.ASAAS_API_KEY) {
     res.status(500).send('Pagamento temporariamente indisponível (configuração pendente).');
     return;
   }
 
-  // Redirect pós-pagamento só se SUCCESS_URL estiver setada (requer domínio cadastrado no Asaas).
-  const successUrl = process.env.SUCCESS_URL || '';
-
   try {
+    const lote = preco.loteVigente();
+    if (precoDivergente(d, lote.base)) {
+      res.status(409).send('O valor da inscrição foi atualizado. Recarregue a página para ver a condição vigente.');
+      return;
+    }
     const cliente = await asaas('/customers', {
-      name: d.nome, email: d.email, mobilePhone: d.whatsapp, cpfCnpj: d.cpfCnpj, externalReference: d.email,
+      name: d.nome, email: d.email, mobilePhone: d.whatsapp, cpfCnpj: d.cpfCnpj,
+      company: d.empresa || undefined,
+      // Origem no próprio painel do Asaas: é onde a inscrição é acompanhada.
+      observations: ['origem: ' + (d.utm || 'direto'), 'lote: ' + lote.id].join(' | '),
+      externalReference: d.email,
     });
-    const cobranca = await asaas('/payments', corpoCobranca(cliente.id, d, successUrl));
+    const cobranca = await asaas('/payments', corpoCobranca(cliente.id, d, lote.base));
     if (!cobranca.invoiceUrl) throw new Error('sem invoiceUrl');
-    res.writeHead(303, { Location: cobranca.invoiceUrl }); // redireciona pro checkout hospedado do Asaas
+    res.writeHead(303, { Location: cobranca.invoiceUrl }); // checkout hospedado pelo Asaas
     res.end();
   } catch (err) {
     console.error('[inscrever] falha na cobrança:', err && err.message);
     const fallback = process.env.WHATSAPP_FALLBACK;
     if (fallback) { res.writeHead(303, { Location: fallback }); res.end(); return; }
-    res.status(502).send('Não foi possível gerar a cobrança agora. Tente novamente em instantes.');
+    res.status(502).send('Não foi possível gerar a cobrança. Confira o CPF/CNPJ informado ou chame a AG no WhatsApp.');
   }
 };

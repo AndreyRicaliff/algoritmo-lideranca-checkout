@@ -1,4 +1,11 @@
 /**
+ * ⚠️ DESATIVADO — NÃO IMPLANTAR (2026-07-27).
+ *
+ * O checkout em produção é o serverless do Vercel (`api/inscrever.js` + `lib/preco.js`).
+ * Este arquivo ficou na 1ª turma: preço fixo de R$ 1.280,50, sem lote por data e sem
+ * antecipação. Implantar isto hoje cobraria o valor da turma anterior.
+ * Mantido só como referência do fluxo com planilha; a regra de preço vive em lib/preco.js.
+ *
  * Checkout Algoritmo da Liderança — coletor de lead + pagamento Asaas → Google Sheets.
  *
  * Fluxo:
