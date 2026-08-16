@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Resultados eNPS — O Algoritmo da Liderança</title>
+<title>Resultados — Avaliação | O Algoritmo da Liderança</title>
 <style>
   :root {
     --accent:#E8B23A; --accent-ink:#3a2b06; --text:#1f2430; --muted:#6b7280;
@@ -14,18 +14,18 @@
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
     color:var(--text); background:var(--soft); }
-  .wrap { max-width:880px; margin:0 auto; padding:24px 16px 60px; }
+  .wrap { max-width:920px; margin:0 auto; padding:24px 16px 60px; }
   .eyebrow { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#b9851f; }
   h1 { font-size:26px; font-weight:800; letter-spacing:-.01em; margin:6px 0 2px; }
   .sub { color:var(--muted); font-size:14px; margin:0 0 20px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
   .sub button { font:inherit; font-size:13px; color:#b9851f; background:none; border:1px solid var(--border);
     border-radius:8px; padding:6px 12px; cursor:pointer; min-height:34px; }
-  .num, .enps-num { font-variant-numeric:tabular-nums; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+  .num { font-variant-numeric:tabular-nums; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
   .card { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:18px;
     box-shadow:0 6px 18px rgba(20,20,30,.05); min-width:0; }
   .hero { display:grid; grid-template-columns:auto 1fr; gap:22px; align-items:center; }
-  .enps-num { font-size:64px; font-weight:800; line-height:1; letter-spacing:-.02em; }
+  .enps-num { font-size:64px; font-weight:800; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
   .zona { font-size:14px; font-weight:700; padding:4px 12px; border-radius:999px; display:inline-block; margin-top:6px; }
   .gauge { height:10px; border-radius:999px; position:relative; margin:14px 0 4px;
     background:linear-gradient(90deg,var(--det) 0 50%,var(--neu) 50% 75%,var(--pro) 75% 100%); opacity:.9; }
@@ -38,12 +38,22 @@
   .stack div { min-width:0; }
   .legenda { display:flex; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--muted); }
   .legenda i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; }
-  .pergunta-titulo { font-size:14px; font-weight:700; margin:0 0 2px; }
-  .pergunta-meta { font-size:12px; color:var(--muted); margin:0 0 10px; }
-  .hist { width:100%; height:auto; display:block; }
-  .hist text { font-size:8px; fill:var(--muted); font-variant-numeric:tabular-nums; }
   .secao { margin-top:26px; }
   .secao h2 { font-size:18px; margin:0 0 12px; }
+  .secao h2 .marca { color:#b9851f; }
+  .item { display:grid; grid-template-columns:1fr auto auto; gap:12px; align-items:center;
+    padding:11px 0; border-top:1px solid var(--border); }
+  .item:first-of-type { border-top:0; padding-top:2px; }
+  .item .titulo { font-size:14px; font-weight:600; line-height:1.3; }
+  .item .n { font-size:11px; color:var(--muted); display:block; font-weight:400; margin-top:2px; }
+  .item .media { font-size:22px; font-weight:800; text-align:right; min-width:58px; }
+  .dist { display:flex; align-items:flex-end; gap:3px; height:34px; width:86px; }
+  .dist i { flex:1; border-radius:3px 3px 0 0; background:var(--accent); opacity:.85; min-height:2px; }
+  .hist { width:100%; height:auto; display:block; }
+  .hist text { font-size:8px; fill:var(--muted); font-variant-numeric:tabular-nums; }
+  .destaques { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+  .destaque-rotulo { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+  .destaque-txt { font-size:15px; font-weight:700; }
   .metodo { font-size:13px; color:var(--muted); line-height:1.6; }
   .metodo b { color:var(--text); }
   .campo-chave { display:flex; gap:8px; }
@@ -53,22 +63,27 @@
   .campo-chave button { font:inherit; font-size:14px; font-weight:700; color:var(--accent-ink);
     background:var(--accent); border:0; border-radius:8px; padding:10px 18px; cursor:pointer; }
   .comentario { border-top:1px solid var(--border); padding:12px 2px; font-size:14px; line-height:1.5; }
+  .comentario .autor { font-size:12px; color:#b9851f; font-weight:700; }
   .comentario .quando { font-size:11px; color:var(--muted); margin-top:4px; }
+  .pessoa { border-top:1px solid var(--border); padding:10px 2px; font-size:14px; }
+  .pessoa b { display:block; }
+  .pessoa span { color:var(--muted); font-size:13px; }
   .skeleton { border-radius:14px; height:120px;
     background:linear-gradient(100deg,var(--border) 30%,#eef0f4 45%,var(--border) 60%);
     background-size:200% 100%; animation:sk 1.2s infinite linear; }
   @keyframes sk { to { background-position:-200% 0; } }
   .aviso { font-size:14px; color:var(--muted); background:var(--bg); border:1px dashed var(--border);
     border-radius:14px; padding:26px; text-align:center; }
-  .erro { color:var(--err,#c0392b); }
-  @media (max-width:560px){ .hero { grid-template-columns:1fr; } .enps-num { font-size:52px; } }
+  .erro { color:var(--det); }
+  @media (max-width:560px){ .hero { grid-template-columns:1fr; } .enps-num { font-size:52px; }
+    .item { grid-template-columns:1fr auto; } .dist { display:none; } }
   @media (prefers-reduced-motion: reduce){ .skeleton { animation:none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <span class="eyebrow">AG Educação · painel interno</span>
-  <h1>Resultados — eNPS do evento</h1>
+  <h1>Resultados da avaliação</h1>
   <p class="sub">
     <span>O Algoritmo da Liderança · 1ª turma (15–17/08)</span>
     <button type="button" id="atualizar">Atualizar</button>
@@ -77,12 +92,11 @@
   <div id="conteudo"><div class="skeleton"></div></div>
 
   <div class="secao card metodo">
-    <b>Método eNPS.</b> Cada participante responde de 0 a 10 à pergunta de recomendação.
-    <b>Promotores</b> = notas 9–10 · <b>Neutros</b> = 7–8 · <b>Detratores</b> = 0–6.
-    <br><b>eNPS = %promotores − %detratores</b> (vai de −100 a +100).
-    Zonas usuais de mercado: <b>≥ 75</b> excelência · <b>50–74</b> qualidade ·
+    <b>Método.</b> Pautas, materiais e experiência: escala <b>1–5</b>
+    (1 muito ruim · 3 regular · 5 excelente), lidas por média e distribuição.
+    Recomendação: <b>eNPS</b> — promotores (9–10) − detratores (0–6) em % de respostas,
+    de −100 a +100. Zonas: <b>≥ 75</b> excelência · <b>50–74</b> qualidade ·
     <b>0–49</b> aperfeiçoamento · <b>&lt; 0</b> crítico.
-    As demais perguntas de escala são lidas por média e distribuição — não entram no eNPS.
   </div>
 </div>
 
@@ -94,6 +108,7 @@
   var chave = '';
   try { chave = localStorage.getItem('nps_chave') || ''; } catch (e) {}
 
+  var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
   var brNum = function (v) { return (v === null || v === undefined) ? '—' : v.toLocaleString('pt-BR'); };
 
   function zona(enps) {
@@ -104,19 +119,35 @@
     return { rotulo: 'Zona crítica', cor: '#fff', fundo: 'var(--det)' };
   }
 
-  function histograma(q) {
-    // 11 barras 0..10 — cor pela semântica NPS quando a pergunta é a de recomendação
-    var W = 330, H = 90, base = 70, bw = 24;
+  function corMedia(m) {
+    if (m === null) return 'var(--muted)';
+    if (m < 3) return 'var(--det)';
+    if (m < 4) return 'var(--neu)';
+    return 'var(--pro)';
+  }
+
+  function distBar(q) {
+    var max = 1;
+    for (var v = 1; v <= 5; v++) max = Math.max(max, q.dist[v] || 0);
+    var s = '<div class="dist" aria-hidden="true">';
+    for (var v = 1; v <= 5; v++) {
+      var n = q.dist[v] || 0;
+      var h = n ? Math.max(3, Math.round((n / max) * 34)) : 2;
+      s += '<i style="height:' + h + 'px' + (n ? '' : ';opacity:.25') + '" title="' + v + ': ' + n + '"></i>';
+    }
+    return s + '</div>';
+  }
+
+  function histogramaNps(q) {
+    var W = 340, H = 92, base = 72, bw = 24;
     var max = 1;
     for (var v = 0; v <= 10; v++) max = Math.max(max, q.dist[v] || 0);
-    var s = '<svg class="hist" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Distribuição de notas">';
+    var s = '<svg class="hist" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Distribuição de notas 0 a 10">';
     for (var v = 0; v <= 10; v++) {
       var n = q.dist[v] || 0;
       var h = n ? Math.max(3, Math.round((n / max) * 52)) : 2;
       var x = 4 + v * 30;
-      var cor = q.tipo === 'nps'
-        ? (v <= 6 ? 'var(--det)' : v <= 8 ? 'var(--neu)' : 'var(--pro)')
-        : 'var(--accent)';
+      var cor = v <= 6 ? 'var(--det)' : v <= 8 ? 'var(--neu)' : 'var(--pro)';
       s += '<rect x="' + x + '" y="' + (base - h) + '" width="' + bw + '" height="' + h +
         '" rx="3" fill="' + cor + '" opacity="' + (n ? '0.9' : '0.25') + '"></rect>';
       s += '<text x="' + (x + bw / 2) + '" y="' + (base + 12) + '" text-anchor="middle">' + v + '</text>';
@@ -134,8 +165,7 @@
       return;
     }
     var z = zona(d.enps);
-    var npsQ = null;
-    for (var id in d.perguntas) if (d.perguntas[id].tipo === 'nps') { npsQ = d.perguntas[id]; break; }
+    var npsQ = d.perguntas.nps_geral;
 
     var html =
       '<div class="card hero">' +
@@ -144,7 +174,7 @@
         '<div>' +
           '<div class="gauge"><i style="left:' + (d.enps === null ? 50 : (d.enps + 100) / 2) + '%"></i></div>' +
           '<div class="gauge-rotulos"><span>−100</span><span>0</span><span>+50</span><span>+100</span></div>' +
-          (npsQ ?
+          (npsQ && npsQ.n ?
           '<div class="stack">' +
             '<div style="background:var(--det);width:' + (npsQ.detratores / npsQ.n * 100) + '%"></div>' +
             '<div style="background:var(--neu);width:' + (npsQ.neutros / npsQ.n * 100) + '%"></div>' +
@@ -163,35 +193,92 @@
         '<div class="card"><div class="kpi num">' + brNum(d.comentariosN) + '</div><div class="kpi-rotulo">comentários</div></div>' +
       '</div>';
 
-    html += '<div class="secao"><h2>Por pergunta</h2><div class="grid">';
-    for (var id in d.perguntas) {
+    // destaques: melhor e pior item da escala 1-5
+    var escalas = [];
+    Object.keys(d.perguntas).forEach(function (id) {
       var q = d.perguntas[id];
-      html += '<div class="card">' +
-        '<p class="pergunta-titulo">' + q.texto.replace(/</g, '&lt;') + '</p>' +
-        '<p class="pergunta-meta num">média ' + (q.media === null ? '—' : q.media.toLocaleString('pt-BR')) +
-        ' · ' + q.n + ' resposta' + (q.n === 1 ? '' : 's') +
-        (q.tipo === 'nps' && q.enps !== null ? ' · eNPS ' + q.enps : '') + '</p>' +
-        histograma(q) + '</div>';
+      if (q.tipo === 'escala' && q.media !== null) escalas.push(q);
+    });
+    if (escalas.length >= 2) {
+      escalas.sort(function (a, b) { return b.media - a.media; });
+      var melhor = escalas[0], pior = escalas[escalas.length - 1];
+      html += '<div class="destaques" style="margin-top:14px">' +
+        '<div class="card"><div class="destaque-rotulo">maior média</div>' +
+          '<div class="destaque-txt">' + esc(melhor.texto) + '</div>' +
+          '<div class="num" style="font-size:24px;font-weight:800;color:var(--pro)">' + melhor.media.toLocaleString('pt-BR') + '</div></div>' +
+        '<div class="card"><div class="destaque-rotulo">menor média</div>' +
+          '<div class="destaque-txt">' + esc(pior.texto) + '</div>' +
+          '<div class="num" style="font-size:24px;font-weight:800;color:' + corMedia(pior.media) + '">' + pior.media.toLocaleString('pt-BR') + '</div></div>' +
+      '</div>';
     }
-    html += '</div></div>';
 
-    html += '<div class="secao card" id="bloco-comentarios">' +
-      '<h2 style="font-size:16px;margin:0 0 10px">Comentários (' + brNum(d.comentariosN) + ')</h2>';
-    if (d.comentarios) {
-      if (d.comentarios.length) {
-        d.comentarios.forEach(function (c) {
-          html += '<div class="comentario">' + String(c.texto).replace(/</g, '&lt;') +
+    // seções na ordem da pesquisa
+    d.secoes.forEach(function (s) {
+      var itens = s.perguntas
+        .map(function (id) { return { id: id, q: d.perguntas[id] }; })
+        .filter(function (x) { return x.q && x.q.tipo === 'escala'; });
+      var ehNps = s.perguntas.indexOf('nps_geral') >= 0;
+      if (!itens.length && !ehNps) return;
+      var partes = s.titulo.split(' · ');
+      var titulo = partes.length === 2
+        ? '<span class="marca">' + esc(partes[0]) + '</span> · ' + esc(partes[1])
+        : esc(s.titulo);
+      html += '<div class="secao"><h2>' + titulo + '</h2><div class="card">';
+      if (ehNps) {
+        html += npsQ && npsQ.n ? histogramaNps(npsQ) :
+          '<p class="metodo">Nenhuma resposta ainda.</p>';
+      } else {
+        itens.forEach(function (x) {
+          var q = x.q;
+          html += '<div class="item">' +
+            '<div class="titulo">' + esc(q.texto) +
+              '<span class="n num">' + q.n + ' resposta' + (q.n === 1 ? '' : 's') + '</span></div>' +
+            distBar(q) +
+            '<div class="media num" style="color:' + corMedia(q.media) + '">' +
+              (q.media === null ? '—' : q.media.toLocaleString('pt-BR')) + '</div>' +
+          '</div>';
+        });
+      }
+      html += '</div></div>';
+    });
+
+    // identificação + comentários (linha a linha, só com chave)
+    html += '<div class="secao card">' +
+      '<h2 style="font-size:16px;margin:0 0 10px">Comentários e identificação</h2>';
+    if (d.textos) {
+      var porSessao = {};
+      d.textos.forEach(function (t) {
+        (porSessao[t.sessao] = porSessao[t.sessao] || {})[t.pergunta_id] = t;
+      });
+      var comentarios = d.textos.filter(function (t) { return t.pergunta_id === 'comentario'; });
+      var identificados = Object.keys(porSessao).filter(function (s) { return porSessao[s].ident_nome; });
+      if (comentarios.length) {
+        comentarios.forEach(function (c) {
+          var quem = porSessao[c.sessao] || {};
+          html += '<div class="comentario">' +
+            (quem.ident_nome ? '<span class="autor">' + esc(quem.ident_nome.texto) +
+              (quem.ident_cargo ? ' · ' + esc(quem.ident_cargo.texto) : '') + '</span><br>' : '') +
+            esc(c.texto) +
             '<div class="quando num">' + new Date(c.criado).toLocaleString('pt-BR') + '</div></div>';
         });
       } else if (d.comentariosN > 0) {
-        html += '<p class="metodo erro">Chave incorreta — os comentários existem mas não foram liberados.</p>' + campoChave();
+        html += '<p class="metodo erro">Chave incorreta — há comentários, mas não foram liberados.</p>' + campoChave();
       } else {
         html += '<p class="metodo">Nenhum comentário ainda.</p>';
       }
+      if (identificados.length) {
+        html += '<h2 style="font-size:14px;margin:18px 0 4px">Quem se identificou (' + identificados.length + ')</h2>';
+        identificados.forEach(function (s) {
+          var p = porSessao[s];
+          html += '<div class="pessoa"><b>' + esc(p.ident_nome.texto) + '</b>' +
+            (p.ident_cargo ? '<span>' + esc(p.ident_cargo.texto) + '</span>' : '') + '</div>';
+        });
+      }
     } else if (d.comentariosN > 0) {
-      html += '<p class="metodo">Protegidos por chave (linha a linha é restrito; agregados são abertos).</p>' + campoChave();
+      html += '<p class="metodo">Protegidos por chave — agregados são abertos, texto é restrito.</p>' + campoChave();
     } else {
-      html += '<p class="metodo">Nenhum comentário ainda.</p>';
+      html += '<p class="metodo">Nenhum comentário ainda.</p>' +
+        (chave ? '' : campoChave());
     }
     html += '</div>';
 
@@ -207,8 +294,8 @@
   }
 
   function campoChave() {
-    return '<form class="campo-chave" id="form-chave">' +
-      '<input type="password" placeholder="Chave de acesso" autocomplete="off" value="">' +
+    return '<form class="campo-chave" id="form-chave" style="margin-top:10px">' +
+      '<input type="password" placeholder="Chave de acesso" autocomplete="off">' +
       '<button type="submit">Liberar</button></form>';
   }
 

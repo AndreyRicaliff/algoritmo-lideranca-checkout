@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#E8B23A">
 <meta name="robots" content="noindex">
-<title>Avalie o evento — O Algoritmo da Liderança</title>
+<title>Avaliação — O Algoritmo da Liderança</title>
 <style>
   :root {
     --accent:#E8B23A; --accent-ink:#3a2b06; --text:#1f2430; --muted:#6b7280;
@@ -15,36 +15,45 @@
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
     color:var(--text); background:var(--soft); min-height:100svh; }
-  .wrap { max-width:520px; margin:0 auto; padding:20px 16px 40px; }
+  .wrap { max-width:560px; margin:0 auto; padding:20px 16px 40px; }
   .eyebrow { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#b9851f; }
-  h1 { font-size:24px; font-weight:800; letter-spacing:-.01em; margin:6px 0 2px; }
-  .sub { color:var(--muted); font-size:14px; margin:0 0 18px; }
-  .progress { height:6px; background:var(--border); border-radius:999px; overflow:hidden; margin:0 0 18px; }
+  h1 { font-size:22px; font-weight:800; letter-spacing:-.01em; margin:6px 0 2px; }
+  .sub { color:var(--muted); font-size:13px; margin:0 0 16px; }
+  .progress { height:6px; background:var(--border); border-radius:999px; overflow:hidden; margin:0 0 16px; }
   .progress b { display:block; height:100%; width:0; background:var(--accent); border-radius:999px;
     transition:width .25s ease; }
   .card { background:var(--bg); border:1px solid var(--border); border-radius:16px;
-    padding:22px 18px; box-shadow:0 8px 24px rgba(20,20,30,.06); }
-  .pergunta { font-size:18px; font-weight:700; line-height:1.35; margin:0 0 18px; }
-  .chips { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
-  .chips button { min-height:48px; font:inherit; font-size:17px; font-weight:700;
+    padding:20px 16px; box-shadow:0 8px 24px rgba(20,20,30,.06); }
+  .secao-titulo { font-size:17px; font-weight:800; margin:0 0 2px; }
+  .secao-titulo .marca { color:#b9851f; }
+  .secao-sub { font-size:13px; color:var(--muted); margin:0 0 14px; }
+  .legenda { font-size:12px; color:var(--muted); background:var(--soft); border-radius:8px;
+    padding:8px 10px; margin:0 0 14px; }
+  .linha { padding:12px 0 14px; border-top:1px solid var(--border); }
+  .linha:first-of-type { border-top:0; padding-top:2px; }
+  .linha .titulo { font-size:15px; font-weight:600; line-height:1.35; margin:0 0 10px; }
+  .chips { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+  .chips.nps { grid-template-columns:repeat(6,1fr); }
+  .chips button { min-height:46px; font:inherit; font-size:16px; font-weight:700;
     font-variant-numeric:tabular-nums; color:var(--text); background:var(--soft);
     border:1px solid var(--border); border-radius:10px; cursor:pointer;
     transition:background .15s,border-color .15s,transform .1s; }
-  .chips button:active { transform:scale(.96); }
+  .chips button:active { transform:scale(.95); }
   .chips button:focus-visible { outline:3px solid var(--ring); outline-offset:1px; }
   .chips button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent);
     color:var(--accent-ink); }
-  .extremos { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:10px; }
-  textarea.field { width:100%; min-height:120px; padding:13px 14px; font:inherit; font-size:15px;
-    color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:10px; resize:vertical; }
-  textarea.field:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 4px var(--ring); }
-  .acoes { display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:20px; }
+  .extremos { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:8px; }
+  input.field, textarea.field { width:100%; padding:12px 13px; font:inherit; font-size:15px;
+    color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:10px; }
+  textarea.field { min-height:120px; resize:vertical; }
+  .field:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 4px var(--ring); }
+  .campo-rotulo { display:block; font-size:13px; color:var(--muted); margin:12px 0 6px; }
+  .acoes { display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:18px; }
   .voltar { font:inherit; font-size:14px; color:var(--muted); background:none; border:0;
     cursor:pointer; padding:12px 8px; min-height:44px; }
   .avancar { font:inherit; font-size:15px; font-weight:700; color:var(--accent-ink);
-    background:var(--accent); border:0; border-radius:10px; padding:13px 22px; min-height:48px; cursor:pointer; }
-  .avancar[disabled] { opacity:.5; cursor:default; }
-  .skeleton { border-radius:16px; height:280px;
+    background:var(--accent); border:0; border-radius:10px; padding:13px 26px; min-height:48px; cursor:pointer; }
+  .skeleton { border-radius:16px; height:320px;
     background:linear-gradient(100deg,var(--border) 30%,#eef0f4 45%,var(--border) 60%);
     background-size:200% 100%; animation:sk 1.2s infinite linear; }
   @keyframes sk { to { background-position:-200% 0; } }
@@ -57,8 +66,8 @@
   .estado p { color:var(--muted); font-size:14px; margin:0 0 6px; }
   .retry { margin-top:14px; }
   .aviso-fila { font-size:13px; color:#b9851f; background:#fdf7e8; border:1px solid #f0e2bf;
-    border-radius:10px; padding:10px 12px; margin-top:16px; }
-  .rodape { text-align:center; color:var(--muted); font-size:12px; margin-top:26px; }
+    border-radius:10px; padding:10px 12px; margin-top:14px; }
+  .rodape { text-align:center; color:var(--muted); font-size:12px; margin-top:24px; }
   .hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
   @media (prefers-reduced-motion: reduce) {
     .progress b, .chips button { transition:none; }
@@ -69,12 +78,12 @@
 <body>
 <div class="wrap">
   <span class="eyebrow">AG Educação · O Algoritmo da Liderança</span>
-  <h1>Como foi pra você?</h1>
-  <p class="sub">1ª turma · 15 a 17 de agosto · anônima, leva 1 minuto</p>
+  <h1>Avaliação do treinamento</h1>
+  <p class="sub">1ª turma · leva menos de 3 minutos · anônima (identificar-se é opcional)</p>
   <div class="progress" aria-hidden="true"><b id="barra"></b></div>
   <div id="palco"><div class="skeleton"></div></div>
   <input class="hp" id="hp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">
-  <p class="rodape">Suas respostas são anônimas — nenhum dado pessoal é coletado.</p>
+  <p class="rodape">Suas notas ajudam a melhorar as próximas edições.</p>
 </div>
 
 <script>
@@ -82,8 +91,9 @@
   'use strict';
   var palco = document.getElementById('palco');
   var barra = document.getElementById('barra');
-  var perguntas = [];
-  var atual = 0;
+  var secoes = [];
+  var rotulos = [];
+  var passo = 0;
   var sessao = null;
 
   function ls(chave, valor) {
@@ -102,7 +112,7 @@
   var respostas = ls('nps_respostas') || {};
   var fila = ls('nps_fila') || [];
 
-  // ---- Envio: cada resposta vai na hora; falhou, entra na fila e tenta no próximo passo ----
+  // ---- Envio: cada resposta vai na hora; falhou, entra na fila e tenta depois ----
   function enviar(item) {
     item.sessao = sessao;
     item.site = document.getElementById('hp').value; // honeypot viaja junto
@@ -123,13 +133,14 @@
     });
   }
   function drenarFila() {
-    if (!fila.length) return Promise.resolve();
+    if (!fila.length) return;
     var pendentes = fila.slice();
     fila = [];
     ls('nps_fila', fila);
-    return Promise.all(pendentes.map(function (i) { return enviar(i).catch(function () {
-      fila.push(i); ls('nps_fila', fila);
-    }); })).then(renderFila);
+    pendentes.forEach(function (i) {
+      enviar(i).catch(function () { fila.push(i); ls('nps_fila', fila); renderFila(); });
+    });
+    renderFila();
   }
   window.addEventListener('online', drenarFila);
   document.addEventListener('visibilitychange', function () {
@@ -148,46 +159,6 @@
     if (el) el.style.display = fila.length ? 'block' : 'none';
   }
 
-  // ---- Telas ----
-  function progresso() {
-    barra.style.width = Math.round((atual / perguntas.length) * 100) + '%';
-  }
-
-  function render() {
-    progresso();
-    if (atual >= perguntas.length) return fim();
-    var q = perguntas[atual];
-    var card = document.createElement('div');
-    card.className = 'card';
-    var h = document.createElement('p');
-    h.className = 'pergunta';
-    h.textContent = (atual + 1) + '/' + perguntas.length + ' — ' + q.texto;
-    card.appendChild(h);
-    if (q.tipo === 'texto') { texto(card, q); } else { escala(card, q); }
-    var acoes = document.createElement('div');
-    acoes.className = 'acoes';
-    var voltar = document.createElement('button');
-    voltar.className = 'voltar'; voltar.type = 'button';
-    voltar.textContent = '← anterior';
-    voltar.style.visibility = atual === 0 ? 'hidden' : 'visible';
-    voltar.onclick = function () { atual--; render(); };
-    acoes.appendChild(voltar);
-    if (q.tipo === 'texto') {
-      var fimBtn = document.createElement('button');
-      fimBtn.className = 'avancar'; fimBtn.type = 'button'; fimBtn.id = 'concluir';
-      fimBtn.textContent = 'Concluir';
-      fimBtn.onclick = function () {
-        var v = card.querySelector('textarea').value.trim();
-        if (v) { respostas[q.id] = v; ls('nps_respostas', respostas);
-          despachar({ pergunta_id: q.id, texto: v.slice(0, 1000) }); }
-        atual++; render();
-      };
-      acoes.appendChild(fimBtn);
-    }
-    card.appendChild(acoes);
-    palco.replaceChildren(card, avisoFila());
-  }
-
   function avisoFila() {
     var el = document.createElement('div');
     el.className = 'aviso-fila'; el.id = 'aviso-fila';
@@ -196,43 +167,129 @@
     return el;
   }
 
-  function escala(card, q) {
+  // ---- Telas (uma por seção) ----
+  function render() {
+    barra.style.width = Math.round((passo / secoes.length) * 100) + '%';
+    if (passo >= secoes.length) return fim();
+    var s = secoes[passo];
+    var card = document.createElement('div');
+    card.className = 'card';
+
+    var t = document.createElement('p');
+    t.className = 'secao-titulo';
+    var partes = s.titulo.split(' · ');
+    t.innerHTML = partes.length === 2
+      ? '<span class="marca">' + esc(partes[0]) + '</span> · ' + esc(partes[1])
+      : esc(s.titulo);
+    card.appendChild(t);
+    var st = document.createElement('p');
+    st.className = 'secao-sub';
+    st.textContent = (passo + 1) + '/' + secoes.length + (s.sub ? ' — ' + s.sub : '');
+    card.appendChild(st);
+
+    var temEscala = s.perguntas.some(function (q) { return q.tipo === 'escala'; });
+    if (temEscala) {
+      var leg = document.createElement('p');
+      leg.className = 'legenda';
+      leg.textContent = '1 = ' + rotulos[0] + ' · 5 = ' + rotulos[4];
+      card.appendChild(leg);
+    }
+
+    s.perguntas.forEach(function (q) {
+      if (q.tipo === 'texto') return campoTexto(card, q, s.id === 'comentario');
+      linhaEscala(card, q);
+    });
+
+    var acoes = document.createElement('div');
+    acoes.className = 'acoes';
+    var voltar = document.createElement('button');
+    voltar.className = 'voltar'; voltar.type = 'button';
+    voltar.textContent = '← anterior';
+    voltar.style.visibility = passo === 0 ? 'hidden' : 'visible';
+    voltar.onclick = function () { salvarTextos(s); passo--; render(); };
+    var avancar = document.createElement('button');
+    avancar.className = 'avancar'; avancar.type = 'button';
+    avancar.textContent = passo === secoes.length - 1 ? 'Concluir' : 'Avançar';
+    avancar.onclick = function () { salvarTextos(s); passo++; render(); };
+    acoes.appendChild(voltar);
+    acoes.appendChild(avancar);
+    card.appendChild(acoes);
+
+    palco.replaceChildren(card, avisoFila());
+    window.scrollTo({ top: 0 });
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  }
+
+  function linhaEscala(card, q) {
+    var linha = document.createElement('div');
+    linha.className = 'linha';
+    var t = document.createElement('p');
+    t.className = 'titulo';
+    t.textContent = q.texto;
+    linha.appendChild(t);
     var chips = document.createElement('div');
-    chips.className = 'chips';
+    chips.className = 'chips' + (q.tipo === 'nps' ? ' nps' : '');
     chips.setAttribute('role', 'group');
-    chips.setAttribute('aria-label', 'Nota de 0 a 10');
-    for (var v = 0; v <= 10; v++) (function (v) {
+    chips.setAttribute('aria-label', q.texto);
+    var de = q.tipo === 'nps' ? 0 : 1;
+    var ate = q.tipo === 'nps' ? 10 : 5;
+    for (var v = de; v <= ate; v++) (function (v) {
       var b = document.createElement('button');
       b.type = 'button';
       b.textContent = v;
+      if (q.tipo === 'escala') b.title = rotulos[v - 1];
       b.setAttribute('aria-pressed', String(respostas[q.id] === v));
       b.onclick = function () {
         respostas[q.id] = v; ls('nps_respostas', respostas);
         chips.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
         b.setAttribute('aria-pressed', 'true');
         despachar({ pergunta_id: q.id, valor: v });
-        setTimeout(function () { atual++; render(); }, 220); // deixa o toque confirmar visualmente
       };
       chips.appendChild(b);
     })(v);
-    card.appendChild(chips);
+    linha.appendChild(chips);
     if (q.min || q.max) {
       var ex = document.createElement('div');
       ex.className = 'extremos';
       ex.innerHTML = '<span></span><span></span>';
-      ex.children[0].textContent = '0 · ' + (q.min || '');
-      ex.children[1].textContent = '10 · ' + (q.max || '');
-      card.appendChild(ex);
+      ex.children[0].textContent = de + ' · ' + (q.min || '');
+      ex.children[1].textContent = ate + ' · ' + (q.max || '');
+      linha.appendChild(ex);
     }
+    card.appendChild(linha);
   }
 
-  function texto(card, q) {
-    var t = document.createElement('textarea');
-    t.className = 'field';
-    t.maxLength = 1000;
-    t.placeholder = 'Escreva aqui (opcional)…';
-    if (typeof respostas[q.id] === 'string') t.value = respostas[q.id];
-    card.appendChild(t);
+  function campoTexto(card, q, longo) {
+    var rotulo = document.createElement('label');
+    rotulo.className = 'campo-rotulo';
+    rotulo.textContent = q.texto;
+    rotulo.htmlFor = 'campo-' + q.id;
+    card.appendChild(rotulo);
+    var campo = document.createElement(longo ? 'textarea' : 'input');
+    campo.className = 'field';
+    campo.id = 'campo-' + q.id;
+    campo.maxLength = q.max || 1000;
+    campo.dataset.pergunta = q.id;
+    if (!longo) campo.autocomplete = 'off';
+    if (typeof respostas[q.id] === 'string') campo.value = respostas[q.id];
+    card.appendChild(campo);
+  }
+
+  // Textos são enviados ao trocar de tela (não a cada tecla)
+  function salvarTextos(s) {
+    s.perguntas.forEach(function (q) {
+      if (q.tipo !== 'texto') return;
+      var campo = document.getElementById('campo-' + q.id);
+      if (!campo) return;
+      var v = campo.value.trim();
+      if (v && v !== respostas[q.id]) {
+        respostas[q.id] = v; ls('nps_respostas', respostas);
+        despachar({ pergunta_id: q.id, texto: v.slice(0, q.max || 1000) });
+      }
+    });
   }
 
   function fim() {
@@ -268,10 +325,14 @@
     fetch('/api/nps-perguntas')
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (d) {
-        perguntas = d.perguntas;
-        // reabriu depois de responder tudo? vai direto pro obrigado, sem repetir
-        atual = perguntas.findIndex(function (q) { return !(q.id in respostas); });
-        if (atual < 0) atual = perguntas.length;
+        secoes = d.secoes;
+        rotulos = d.escalaRotulos;
+        // reabriu? retoma na primeira seção com pergunta em aberto (identificação não conta)
+        passo = 0;
+        for (var i = secoes.length - 1; i >= 0; i--) {
+          var todas = secoes[i].perguntas.every(function (q) { return q.id in respostas; });
+          if (todas) { passo = Math.min(i + 1, secoes.length); break; }
+        }
         render();
         drenarFila();
       })

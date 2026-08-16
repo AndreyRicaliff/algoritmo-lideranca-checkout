@@ -1,9 +1,10 @@
 // Estatísticas agregadas da pesquisa pro painel interno (/resultados).
-// O banco devolve só o histograma (pergunta × valor × n) — o eNPS e as faixas são
+// O banco devolve só o histograma (pergunta × valor × n) — o eNPS, médias e faixas são
 // calculados AQUI, num lugar só, e o front apenas renderiza.
 //
 // Método eNPS: promotores = notas 9-10, neutros = 7-8, detratores = 0-6.
-// eNPS = %promotores − %detratores (inteiro, -100 a +100), sobre as perguntas tipo 'nps'.
+// eNPS = %promotores − %detratores (inteiro, -100 a +100), sobre a pergunta tipo 'nps'.
+// Demais perguntas são escala 1-5, lidas por média e distribuição.
 
 const nps = require('../lib/nps.js');
 
@@ -40,12 +41,19 @@ function resumo(rows) {
     const meta = nps.PERGUNTAS.find((p) => p.id === id);
     q.texto = meta ? meta.texto : id;
   }
-  // eNPS geral = média das perguntas tipo 'nps' com resposta (normalmente é uma só)
-  const comEnps = Object.values(perguntas).filter((q) => q.tipo === 'nps' && q.enps !== null);
-  const enps = comEnps.length
-    ? Math.round(comEnps.reduce((s, q) => s + q.enps, 0) / comEnps.length)
-    : null;
-  return { evento: nps.EVENTO, sessoes, comentariosN, enps, perguntas };
+  const geral = perguntas.nps_geral;
+  return {
+    evento: nps.EVENTO,
+    sessoes,
+    comentariosN,
+    enps: geral && geral.enps !== undefined ? geral.enps : null,
+    // esqueleto das seções pro painel renderizar agrupado na ordem da pesquisa
+    secoes: nps.SECOES.map((s) => ({
+      id: s.id, titulo: s.titulo,
+      perguntas: s.perguntas.map((q) => q.id),
+    })),
+    perguntas,
+  };
 }
 
 module.exports = async function handler(req, res) {
@@ -58,8 +66,9 @@ module.exports = async function handler(req, res) {
     }
     const corpo = Object.assign({}, dados);
     if (chave) {
-      // Chave errada devolve conjunto vazio (sem oráculo) — o front compara com comentariosN.
-      corpo.comentarios = await nps.rpc('nps_comentarios', { p_evento: nps.EVENTO, p_chave: chave });
+      // Chave errada devolve conjunto vazio (sem oráculo). Vem TUDO que é texto —
+      // identificação e comentário — com a sessão pra ligar as pontas no painel.
+      corpo.textos = await nps.rpc('nps_comentarios', { p_evento: nps.EVENTO, p_chave: chave });
       res.setHeader('Cache-Control', 'no-store');
     } else {
       res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=60');

@@ -36,13 +36,16 @@ module.exports = async function handler(req, res) {
     p_pergunta_id: pergunta.id, p_tipo: pergunta.tipo, p_valor: null, p_texto: null,
   };
   if (pergunta.tipo === 'texto') {
-    const texto = String(p.texto || '').trim().slice(0, 1000);
-    if (!texto) { res.status(204).end(); return; } // comentário vazio não é resposta
+    const texto = String(p.texto || '').trim().slice(0, pergunta.max || 1000);
+    if (!texto) { res.status(204).end(); return; } // texto vazio não é resposta
     args.p_texto = texto;
   } else {
+    // faixa por tipo: escala do evento é 1-5, recomendação (eNPS) é 0-10
+    const min = pergunta.tipo === 'nps' ? 0 : 1;
+    const max = pergunta.tipo === 'nps' ? 10 : 5;
     const valor = Number(p.valor);
-    if (!Number.isInteger(valor) || valor < 0 || valor > 10) {
-      res.status(400).json({ error: 'valor fora da escala 0-10' });
+    if (!Number.isInteger(valor) || valor < min || valor > max) {
+      res.status(400).json({ error: 'valor fora da escala ' + min + '-' + max });
       return;
     }
     args.p_valor = valor;
