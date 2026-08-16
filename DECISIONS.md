@@ -43,3 +43,18 @@ ainda não confirmado no extrato do Asaas**; há um teto de sanidade de 35% que 
 cobrar um preço absurdo por env var errada.
 **Em entrevista (30s):** "Repasse de taxa é gross-up, não markup: divide pela taxa complementar,
 senão você recupera menos do que pagou."
+
+## 2026-08-16 — [nps] pesquisa do evento no Supabase AG-Converge, acesso só por RPC
+**Problema:** pesquisa eNPS pós-evento precisa de persistência; o repo do checkout não tem banco.
+**Opções:** A) projeto Supabase novo (custo extra na org Pro / pausa no free) · B) reusar
+`survey_responses` do AG-Converge (tem `anon_select using(true)` — herdaria leitura pública) ·
+C) tabelas novas `nps_*` no Converge, zero policies, acesso só por RPC SECURITY DEFINER.
+**Decisão:** C. **Por quê:** org Pro não pausa; infra de eventos já é o Converge; fail-closed de
+verdade — anon key pública não lê nem escreve linha; agregado sai por `nps_stats`, texto livre só
+com chave (`nps_comentarios`, chave errada = vazio, sem oráculo). **Consequências:** migration
+vive neste repo (`supabase/migrations/`) apontando pro Converge; anon key committada é pública por
+design; perguntas têm fonte única em `lib/nps.js`.
+**Em entrevista (30s):** "Pesquisa anônima com estatística agregada pública e dado bruto restrito:
+em vez de policies de SELECT, tranquei a tabela inteira e expus duas RPCs SECURITY DEFINER — uma
+grava com validação e upsert por sessão, outra devolve só histograma. A anon key pode vazar que
+não há o que ler com ela."

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#E8B23A">
+<meta name="robots" content="noindex">
+<title>Avalie o evento — O Algoritmo da Liderança</title>
+<style>
+  :root {
+    --accent:#E8B23A; --accent-ink:#3a2b06; --text:#1f2430; --muted:#6b7280;
+    --bg:#ffffff; --soft:#f6f7f9; --border:#e2e4ec; --ring:rgba(232,178,58,.25);
+    --ok:#1f9d57; --err:#c0392b;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    color:var(--text); background:var(--soft); min-height:100svh; }
+  .wrap { max-width:520px; margin:0 auto; padding:20px 16px 40px; }
+  .eyebrow { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#b9851f; }
+  h1 { font-size:24px; font-weight:800; letter-spacing:-.01em; margin:6px 0 2px; }
+  .sub { color:var(--muted); font-size:14px; margin:0 0 18px; }
+  .progress { height:6px; background:var(--border); border-radius:999px; overflow:hidden; margin:0 0 18px; }
+  .progress b { display:block; height:100%; width:0; background:var(--accent); border-radius:999px;
+    transition:width .25s ease; }
+  .card { background:var(--bg); border:1px solid var(--border); border-radius:16px;
+    padding:22px 18px; box-shadow:0 8px 24px rgba(20,20,30,.06); }
+  .pergunta { font-size:18px; font-weight:700; line-height:1.35; margin:0 0 18px; }
+  .chips { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
+  .chips button { min-height:48px; font:inherit; font-size:17px; font-weight:700;
+    font-variant-numeric:tabular-nums; color:var(--text); background:var(--soft);
+    border:1px solid var(--border); border-radius:10px; cursor:pointer;
+    transition:background .15s,border-color .15s,transform .1s; }
+  .chips button:active { transform:scale(.96); }
+  .chips button:focus-visible { outline:3px solid var(--ring); outline-offset:1px; }
+  .chips button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent);
+    color:var(--accent-ink); }
+  .extremos { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:10px; }
+  textarea.field { width:100%; min-height:120px; padding:13px 14px; font:inherit; font-size:15px;
+    color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:10px; resize:vertical; }
+  textarea.field:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 4px var(--ring); }
+  .acoes { display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:20px; }
+  .voltar { font:inherit; font-size:14px; color:var(--muted); background:none; border:0;
+    cursor:pointer; padding:12px 8px; min-height:44px; }
+  .avancar { font:inherit; font-size:15px; font-weight:700; color:var(--accent-ink);
+    background:var(--accent); border:0; border-radius:10px; padding:13px 22px; min-height:48px; cursor:pointer; }
+  .avancar[disabled] { opacity:.5; cursor:default; }
+  .skeleton { border-radius:16px; height:280px;
+    background:linear-gradient(100deg,var(--border) 30%,#eef0f4 45%,var(--border) 60%);
+    background-size:200% 100%; animation:sk 1.2s infinite linear; }
+  @keyframes sk { to { background-position:-200% 0; } }
+  .estado { text-align:center; padding:36px 18px; }
+  .estado .icone { width:64px; height:64px; border-radius:50%; margin:0 auto 16px;
+    display:flex; align-items:center; justify-content:center; }
+  .estado.ok .icone { background:#e8f6ee; color:var(--ok); }
+  .estado.falha .icone { background:#fdecea; color:var(--err); }
+  .estado h2 { margin:0 0 8px; font-size:22px; }
+  .estado p { color:var(--muted); font-size:14px; margin:0 0 6px; }
+  .retry { margin-top:14px; }
+  .aviso-fila { font-size:13px; color:#b9851f; background:#fdf7e8; border:1px solid #f0e2bf;
+    border-radius:10px; padding:10px 12px; margin-top:16px; }
+  .rodape { text-align:center; color:var(--muted); font-size:12px; margin-top:26px; }
+  .hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+  @media (prefers-reduced-motion: reduce) {
+    .progress b, .chips button { transition:none; }
+    .skeleton { animation:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="eyebrow">AG Educação · O Algoritmo da Liderança</span>
+  <h1>Como foi pra você?</h1>
+  <p class="sub">2ª turma · 18 a 20 de setembro · anônima, leva 1 minuto</p>
+  <div class="progress" aria-hidden="true"><b id="barra"></b></div>
+  <div id="palco"><div class="skeleton"></div></div>
+  <input class="hp" id="hp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <p class="rodape">Suas respostas são anônimas — nenhum dado pessoal é coletado.</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var palco = document.getElementById('palco');
+  var barra = document.getElementById('barra');
+  var perguntas = [];
+  var atual = 0;
+  var sessao = null;
+
+  function ls(chave, valor) {
+    try {
+      if (arguments.length === 2) { localStorage.setItem(chave, JSON.stringify(valor)); return valor; }
+      var v = localStorage.getItem(chave);
+      return v === null ? null : JSON.parse(v);
+    } catch (e) { return null; } // modo privado sem storage: segue sem persistência
+  }
+
+  sessao = ls('nps_sessao');
+  if (!sessao) sessao = ls('nps_sessao', (crypto.randomUUID && crypto.randomUUID()) ||
+    'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, function () {
+      return Math.floor(Math.random() * 16).toString(16);
+    }));
+  var respostas = ls('nps_respostas') || {};
+  var fila = ls('nps_fila') || [];
+
+  // ---- Envio: cada resposta vai na hora; falhou, entra na fila e tenta no próximo passo ----
+  function enviar(item) {
+    item.sessao = sessao;
+    item.site = document.getElementById('hp').value; // honeypot viaja junto
+    return fetch('/api/nps', {
+      method: 'POST', keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item),
+    }).then(function (r) {
+      if (!r.ok && r.status !== 204 && r.status !== 409) throw new Error(r.status);
+    });
+  }
+  function despachar(item) {
+    enviar(item).catch(function () {
+      fila = fila.filter(function (f) { return f.pergunta_id !== item.pergunta_id; });
+      fila.push(item);
+      ls('nps_fila', fila);
+      renderFila();
+    });
+  }
+  function drenarFila() {
+    if (!fila.length) return Promise.resolve();
+    var pendentes = fila.slice();
+    fila = [];
+    ls('nps_fila', fila);
+    return Promise.all(pendentes.map(function (i) { return enviar(i).catch(function () {
+      fila.push(i); ls('nps_fila', fila);
+    }); })).then(renderFila);
+  }
+  window.addEventListener('online', drenarFila);
+  document.addEventListener('visibilitychange', function () {
+    // última chance ao sair: beacon não espera resposta e sobrevive ao fechamento da aba
+    if (document.visibilityState === 'hidden' && fila.length && navigator.sendBeacon) {
+      fila.forEach(function (i) {
+        i.sessao = sessao;
+        navigator.sendBeacon('/api/nps', new Blob([JSON.stringify(i)], { type: 'application/json' }));
+      });
+      fila = []; ls('nps_fila', fila);
+    }
+  });
+
+  function renderFila() {
+    var el = document.getElementById('aviso-fila');
+    if (el) el.style.display = fila.length ? 'block' : 'none';
+  }
+
+  // ---- Telas ----
+  function progresso() {
+    barra.style.width = Math.round((atual / perguntas.length) * 100) + '%';
+  }
+
+  function render() {
+    progresso();
+    if (atual >= perguntas.length) return fim();
+    var q = perguntas[atual];
+    var card = document.createElement('div');
+    card.className = 'card';
+    var h = document.createElement('p');
+    h.className = 'pergunta';
+    h.textContent = (atual + 1) + '/' + perguntas.length + ' — ' + q.texto;
+    card.appendChild(h);
+    if (q.tipo === 'texto') { texto(card, q); } else { escala(card, q); }
+    var acoes = document.createElement('div');
+    acoes.className = 'acoes';
+    var voltar = document.createElement('button');
+    voltar.className = 'voltar'; voltar.type = 'button';
+    voltar.textContent = '← anterior';
+    voltar.style.visibility = atual === 0 ? 'hidden' : 'visible';
+    voltar.onclick = function () { atual--; render(); };
+    acoes.appendChild(voltar);
+    if (q.tipo === 'texto') {
+      var fimBtn = document.createElement('button');
+      fimBtn.className = 'avancar'; fimBtn.type = 'button'; fimBtn.id = 'concluir';
+      fimBtn.textContent = 'Concluir';
+      fimBtn.onclick = function () {
+        var v = card.querySelector('textarea').value.trim();
+        if (v) { respostas[q.id] = v; ls('nps_respostas', respostas);
+          despachar({ pergunta_id: q.id, texto: v.slice(0, 1000) }); }
+        atual++; render();
+      };
+      acoes.appendChild(fimBtn);
+    }
+    card.appendChild(acoes);
+    palco.replaceChildren(card, avisoFila());
+  }
+
+  function avisoFila() {
+    var el = document.createElement('div');
+    el.className = 'aviso-fila'; el.id = 'aviso-fila';
+    el.textContent = 'Sem conexão agora — suas respostas estão guardadas e serão enviadas sozinhas.';
+    el.style.display = fila.length ? 'block' : 'none';
+    return el;
+  }
+
+  function escala(card, q) {
+    var chips = document.createElement('div');
+    chips.className = 'chips';
+    chips.setAttribute('role', 'group');
+    chips.setAttribute('aria-label', 'Nota de 0 a 10');
+    for (var v = 0; v <= 10; v++) (function (v) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = v;
+      b.setAttribute('aria-pressed', String(respostas[q.id] === v));
+      b.onclick = function () {
+        respostas[q.id] = v; ls('nps_respostas', respostas);
+        chips.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+        b.setAttribute('aria-pressed', 'true');
+        despachar({ pergunta_id: q.id, valor: v });
+        setTimeout(function () { atual++; render(); }, 220); // deixa o toque confirmar visualmente
+      };
+      chips.appendChild(b);
+    })(v);
+    card.appendChild(chips);
+    if (q.min || q.max) {
+      var ex = document.createElement('div');
+      ex.className = 'extremos';
+      ex.innerHTML = '<span></span><span></span>';
+      ex.children[0].textContent = '0 · ' + (q.min || '');
+      ex.children[1].textContent = '10 · ' + (q.max || '');
+      card.appendChild(ex);
+    }
+  }
+
+  function texto(card, q) {
+    var t = document.createElement('textarea');
+    t.className = 'field';
+    t.maxLength = 1000;
+    t.placeholder = 'Escreva aqui (opcional)…';
+    if (typeof respostas[q.id] === 'string') t.value = respostas[q.id];
+    card.appendChild(t);
+  }
+
+  function fim() {
+    barra.style.width = '100%';
+    var div = document.createElement('div');
+    div.className = 'card estado ok';
+    div.innerHTML =
+      '<div class="icone"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>' +
+      '<h2>Obrigado!</h2><p>Sua avaliação ajuda a construir as próximas turmas.</p>' +
+      '<p><b>AG Educação · O Algoritmo da Liderança</b></p>';
+    var aviso = avisoFila();
+    aviso.textContent = 'Algumas respostas aguardam conexão — deixe a página aberta um instante.';
+    div.appendChild(aviso);
+    palco.replaceChildren(div);
+    drenarFila();
+  }
+
+  function erroCarga() {
+    var div = document.createElement('div');
+    div.className = 'card estado falha';
+    div.innerHTML =
+      '<div class="icone"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg></div>' +
+      '<h2>Não carregou</h2><p>Confira a conexão e tente de novo.</p>';
+    var b = document.createElement('button');
+    b.className = 'avancar retry'; b.type = 'button'; b.textContent = 'Tentar novamente';
+    b.onclick = carregar;
+    div.appendChild(b);
+    palco.replaceChildren(div);
+  }
+
+  function carregar() {
+    palco.innerHTML = '<div class="skeleton"></div>';
+    fetch('/api/nps-perguntas')
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) {
+        perguntas = d.perguntas;
+        // reabriu depois de responder tudo? vai direto pro obrigado, sem repetir
+        atual = perguntas.findIndex(function (q) { return !(q.id in respostas); });
+        if (atual < 0) atual = perguntas.length;
+        render();
+        drenarFila();
+      })
+      .catch(erroCarga);
+  }
+  carregar();
+})();
+</script>
+</body>
+</html>

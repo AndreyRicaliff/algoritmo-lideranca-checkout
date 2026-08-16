@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Resultados eNPS — O Algoritmo da Liderança</title>
+<style>
+  :root {
+    --accent:#E8B23A; --accent-ink:#3a2b06; --text:#1f2430; --muted:#6b7280;
+    --bg:#ffffff; --soft:#f6f7f9; --border:#e2e4ec; --ring:rgba(232,178,58,.25);
+    --det:#c0392b; --neu:#d8a013; --pro:#1f9d57;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    color:var(--text); background:var(--soft); }
+  .wrap { max-width:880px; margin:0 auto; padding:24px 16px 60px; }
+  .eyebrow { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#b9851f; }
+  h1 { font-size:26px; font-weight:800; letter-spacing:-.01em; margin:6px 0 2px; }
+  .sub { color:var(--muted); font-size:14px; margin:0 0 20px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .sub button { font:inherit; font-size:13px; color:#b9851f; background:none; border:1px solid var(--border);
+    border-radius:8px; padding:6px 12px; cursor:pointer; min-height:34px; }
+  .num, .enps-num { font-variant-numeric:tabular-nums; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+  .card { background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:18px;
+    box-shadow:0 6px 18px rgba(20,20,30,.05); min-width:0; }
+  .hero { display:grid; grid-template-columns:auto 1fr; gap:22px; align-items:center; }
+  .enps-num { font-size:64px; font-weight:800; line-height:1; letter-spacing:-.02em; }
+  .zona { font-size:14px; font-weight:700; padding:4px 12px; border-radius:999px; display:inline-block; margin-top:6px; }
+  .gauge { height:10px; border-radius:999px; position:relative; margin:14px 0 4px;
+    background:linear-gradient(90deg,var(--det) 0 50%,var(--neu) 50% 75%,var(--pro) 75% 100%); opacity:.9; }
+  .gauge i { position:absolute; top:-5px; width:4px; height:20px; background:var(--text); border-radius:2px;
+    transform:translateX(-50%); }
+  .gauge-rotulos { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); }
+  .kpi { font-size:28px; font-weight:800; }
+  .kpi-rotulo { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+  .stack { display:flex; height:26px; border-radius:8px; overflow:hidden; margin:10px 0 8px; }
+  .stack div { min-width:0; }
+  .legenda { display:flex; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--muted); }
+  .legenda i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; }
+  .pergunta-titulo { font-size:14px; font-weight:700; margin:0 0 2px; }
+  .pergunta-meta { font-size:12px; color:var(--muted); margin:0 0 10px; }
+  .hist { width:100%; height:auto; display:block; }
+  .hist text { font-size:8px; fill:var(--muted); font-variant-numeric:tabular-nums; }
+  .secao { margin-top:26px; }
+  .secao h2 { font-size:18px; margin:0 0 12px; }
+  .metodo { font-size:13px; color:var(--muted); line-height:1.6; }
+  .metodo b { color:var(--text); }
+  .campo-chave { display:flex; gap:8px; }
+  .campo-chave input { flex:1; min-width:0; font:inherit; font-size:14px; padding:10px 12px;
+    border:1px solid var(--border); border-radius:8px; }
+  .campo-chave input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--ring); }
+  .campo-chave button { font:inherit; font-size:14px; font-weight:700; color:var(--accent-ink);
+    background:var(--accent); border:0; border-radius:8px; padding:10px 18px; cursor:pointer; }
+  .comentario { border-top:1px solid var(--border); padding:12px 2px; font-size:14px; line-height:1.5; }
+  .comentario .quando { font-size:11px; color:var(--muted); margin-top:4px; }
+  .skeleton { border-radius:14px; height:120px;
+    background:linear-gradient(100deg,var(--border) 30%,#eef0f4 45%,var(--border) 60%);
+    background-size:200% 100%; animation:sk 1.2s infinite linear; }
+  @keyframes sk { to { background-position:-200% 0; } }
+  .aviso { font-size:14px; color:var(--muted); background:var(--bg); border:1px dashed var(--border);
+    border-radius:14px; padding:26px; text-align:center; }
+  .erro { color:var(--err,#c0392b); }
+  @media (max-width:560px){ .hero { grid-template-columns:1fr; } .enps-num { font-size:52px; } }
+  @media (prefers-reduced-motion: reduce){ .skeleton { animation:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="eyebrow">AG Educação · painel interno</span>
+  <h1>Resultados — eNPS do evento</h1>
+  <p class="sub">
+    <span>O Algoritmo da Liderança · 2ª turma (18–20/09)</span>
+    <button type="button" id="atualizar">Atualizar</button>
+    <span id="quando"></span>
+  </p>
+  <div id="conteudo"><div class="skeleton"></div></div>
+
+  <div class="secao card metodo">
+    <b>Método eNPS.</b> Cada participante responde de 0 a 10 à pergunta de recomendação.
+    <b>Promotores</b> = notas 9–10 · <b>Neutros</b> = 7–8 · <b>Detratores</b> = 0–6.
+    <br><b>eNPS = %promotores − %detratores</b> (vai de −100 a +100).
+    Zonas usuais de mercado: <b>≥ 75</b> excelência · <b>50–74</b> qualidade ·
+    <b>0–49</b> aperfeiçoamento · <b>&lt; 0</b> crítico.
+    As demais perguntas de escala são lidas por média e distribuição — não entram no eNPS.
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var conteudo = document.getElementById('conteudo');
+  var quando = document.getElementById('quando');
+  var chave = '';
+  try { chave = localStorage.getItem('nps_chave') || ''; } catch (e) {}
+
+  var brNum = function (v) { return (v === null || v === undefined) ? '—' : v.toLocaleString('pt-BR'); };
+
+  function zona(enps) {
+    if (enps === null) return { rotulo: 'sem respostas', cor: 'var(--muted)', fundo: 'var(--soft)' };
+    if (enps >= 75) return { rotulo: 'Zona de excelência', cor: '#fff', fundo: 'var(--pro)' };
+    if (enps >= 50) return { rotulo: 'Zona de qualidade', cor: 'var(--accent-ink)', fundo: 'var(--accent)' };
+    if (enps >= 0) return { rotulo: 'Zona de aperfeiçoamento', cor: '#7a5b00', fundo: '#fdf7e8' };
+    return { rotulo: 'Zona crítica', cor: '#fff', fundo: 'var(--det)' };
+  }
+
+  function histograma(q) {
+    // 11 barras 0..10 — cor pela semântica NPS quando a pergunta é a de recomendação
+    var W = 330, H = 90, base = 70, bw = 24;
+    var max = 1;
+    for (var v = 0; v <= 10; v++) max = Math.max(max, q.dist[v] || 0);
+    var s = '<svg class="hist" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Distribuição de notas">';
+    for (var v = 0; v <= 10; v++) {
+      var n = q.dist[v] || 0;
+      var h = n ? Math.max(3, Math.round((n / max) * 52)) : 2;
+      var x = 4 + v * 30;
+      var cor = q.tipo === 'nps'
+        ? (v <= 6 ? 'var(--det)' : v <= 8 ? 'var(--neu)' : 'var(--pro)')
+        : 'var(--accent)';
+      s += '<rect x="' + x + '" y="' + (base - h) + '" width="' + bw + '" height="' + h +
+        '" rx="3" fill="' + cor + '" opacity="' + (n ? '0.9' : '0.25') + '"></rect>';
+      s += '<text x="' + (x + bw / 2) + '" y="' + (base + 12) + '" text-anchor="middle">' + v + '</text>';
+      if (n) s += '<text x="' + (x + bw / 2) + '" y="' + (base - h - 4) + '" text-anchor="middle">' + n + '</text>';
+    }
+    return s + '</svg>';
+  }
+
+  function render(d) {
+    var raiz = document.createElement('div');
+    if (!d.sessoes) {
+      raiz.innerHTML = '<div class="aviso">Nenhuma resposta ainda.<br>' +
+        'Projete o QR (<b>/qr</b>) ou compartilhe <b>/pesquisa</b> com a turma.</div>';
+      conteudo.replaceChildren(raiz);
+      return;
+    }
+    var z = zona(d.enps);
+    var npsQ = null;
+    for (var id in d.perguntas) if (d.perguntas[id].tipo === 'nps') { npsQ = d.perguntas[id]; break; }
+
+    var html =
+      '<div class="card hero">' +
+        '<div><div class="enps-num">' + (d.enps === null ? '—' : d.enps) + '</div>' +
+        '<span class="zona" style="color:' + z.cor + ';background:' + z.fundo + '">' + z.rotulo + '</span></div>' +
+        '<div>' +
+          '<div class="gauge"><i style="left:' + (d.enps === null ? 50 : (d.enps + 100) / 2) + '%"></i></div>' +
+          '<div class="gauge-rotulos"><span>−100</span><span>0</span><span>+50</span><span>+100</span></div>' +
+          (npsQ ?
+          '<div class="stack">' +
+            '<div style="background:var(--det);width:' + (npsQ.detratores / npsQ.n * 100) + '%"></div>' +
+            '<div style="background:var(--neu);width:' + (npsQ.neutros / npsQ.n * 100) + '%"></div>' +
+            '<div style="background:var(--pro);width:' + (npsQ.promotores / npsQ.n * 100) + '%"></div>' +
+          '</div>' +
+          '<div class="legenda">' +
+            '<span><i style="background:var(--det)"></i>Detratores ' + npsQ.detratores + '</span>' +
+            '<span><i style="background:var(--neu)"></i>Neutros ' + npsQ.neutros + '</span>' +
+            '<span><i style="background:var(--pro)"></i>Promotores ' + npsQ.promotores + '</span>' +
+          '</div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="grid" style="margin-top:14px">' +
+        '<div class="card"><div class="kpi num">' + brNum(d.sessoes) + '</div><div class="kpi-rotulo">participantes</div></div>' +
+        (npsQ ? '<div class="card"><div class="kpi num">' + brNum(npsQ.n) + '</div><div class="kpi-rotulo">responderam a recomendação</div></div>' : '') +
+        '<div class="card"><div class="kpi num">' + brNum(d.comentariosN) + '</div><div class="kpi-rotulo">comentários</div></div>' +
+      '</div>';
+
+    html += '<div class="secao"><h2>Por pergunta</h2><div class="grid">';
+    for (var id in d.perguntas) {
+      var q = d.perguntas[id];
+      html += '<div class="card">' +
+        '<p class="pergunta-titulo">' + q.texto.replace(/</g, '&lt;') + '</p>' +
+        '<p class="pergunta-meta num">média ' + (q.media === null ? '—' : q.media.toLocaleString('pt-BR')) +
+        ' · ' + q.n + ' resposta' + (q.n === 1 ? '' : 's') +
+        (q.tipo === 'nps' && q.enps !== null ? ' · eNPS ' + q.enps : '') + '</p>' +
+        histograma(q) + '</div>';
+    }
+    html += '</div></div>';
+
+    html += '<div class="secao card" id="bloco-comentarios">' +
+      '<h2 style="font-size:16px;margin:0 0 10px">Comentários (' + brNum(d.comentariosN) + ')</h2>';
+    if (d.comentarios) {
+      if (d.comentarios.length) {
+        d.comentarios.forEach(function (c) {
+          html += '<div class="comentario">' + String(c.texto).replace(/</g, '&lt;') +
+            '<div class="quando num">' + new Date(c.criado).toLocaleString('pt-BR') + '</div></div>';
+        });
+      } else if (d.comentariosN > 0) {
+        html += '<p class="metodo erro">Chave incorreta — os comentários existem mas não foram liberados.</p>' + campoChave();
+      } else {
+        html += '<p class="metodo">Nenhum comentário ainda.</p>';
+      }
+    } else if (d.comentariosN > 0) {
+      html += '<p class="metodo">Protegidos por chave (linha a linha é restrito; agregados são abertos).</p>' + campoChave();
+    } else {
+      html += '<p class="metodo">Nenhum comentário ainda.</p>';
+    }
+    html += '</div>';
+
+    raiz.innerHTML = html;
+    conteudo.replaceChildren(raiz);
+    var f = document.getElementById('form-chave');
+    if (f) f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      chave = f.querySelector('input').value.trim();
+      try { localStorage.setItem('nps_chave', chave); } catch (err) {}
+      carregar();
+    });
+  }
+
+  function campoChave() {
+    return '<form class="campo-chave" id="form-chave">' +
+      '<input type="password" placeholder="Chave de acesso" autocomplete="off" value="">' +
+      '<button type="submit">Liberar</button></form>';
+  }
+
+  function erro(msg) {
+    conteudo.innerHTML = '<div class="aviso erro">' + msg +
+      '<br><br><button type="button" class="sub" onclick="location.reload()" style="font-weight:700;cursor:pointer">Recarregar</button></div>';
+  }
+
+  function carregar() {
+    fetch('/api/nps-stats' + (chave ? '?chave=' + encodeURIComponent(chave) : ''))
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) {
+        render(d);
+        quando.textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR');
+      })
+      .catch(function () { erro('Não foi possível carregar as estatísticas.'); });
+  }
+
+  document.getElementById('atualizar').addEventListener('click', carregar);
+  setInterval(carregar, 30000); // acompanha ao vivo durante o evento
+  carregar();
+})();
+</script>
+</body>
+</html>
