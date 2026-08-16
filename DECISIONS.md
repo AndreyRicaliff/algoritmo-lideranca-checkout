@@ -58,3 +58,22 @@ design; perguntas têm fonte única em `lib/nps.js`.
 em vez de policies de SELECT, tranquei a tabela inteira e expus duas RPCs SECURITY DEFINER — uma
 grava com validação e upsert por sessão, outra devolve só histograma. A anon key pode vazar que
 não há o que ler com ela."
+
+## 2026-08-16 — [nps] login do /resultados validado no banco, sem env var e sem segredo no repo
+**Problema:** painel precisa de login (usuário+senha fixos, sem 2FA) e a chave de comentários
+morre; o repo é público e a senha pedida é reusada em outros sistemas da AG.
+**Opções:** A) credencial hardcoded no front/API (vaza no repo público) · B) env vars no Vercel
+(exige o dono provisionar + redeploy a cada troca; assinatura de cookie precisaria de segredo
+extra) · C) credencial bcrypt no nps_config + sessão por token uuid em tabela, tudo validado
+por RPC; cookie HttpOnly só transporta o token.
+**Decisão:** C. **Por quê:** zero segredo em código/env; a senha nunca passa pelo assistente
+(dono roda o UPDATE no SQL Editor); troca de senha não exige deploy; freio de 20 falhas/15min
+protege uma senha reusada contra brute force; agregados também ficam atrás da sessão — login
+obrigatório de verdade, não teatro de página.
+**Consequências:** sessões de 30 dias em nps_admin_sessao; lockout temporário pode ser usado
+pra travar o login por 15min (aceito, painel interno); nps_stats(text) e nps_comentarios
+(chave) removidos após o deploy.
+**Em entrevista (30s):** "Auth de painel interno sem infra nova: bcrypt no Postgres, sessão
+por token opaco em cookie HttpOnly e autorização dentro de RPC SECURITY DEFINER — o serverless
+é só transporte. O trade-off foi aceitar lockout coletivo de 15min em troca de frear brute
+force numa senha que o cliente reusa."

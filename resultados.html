@@ -105,8 +105,6 @@
   'use strict';
   var conteudo = document.getElementById('conteudo');
   var quando = document.getElementById('quando');
-  var chave = '';
-  try { chave = localStorage.getItem('nps_chave') || ''; } catch (e) {}
 
   var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
   var brNum = function (v) { return (v === null || v === undefined) ? '—' : v.toLocaleString('pt-BR'); };
@@ -242,61 +240,71 @@
       html += '</div></div>';
     });
 
-    // identificação + comentários (linha a linha, só com chave)
+    // identificação + comentários (linha a linha — a página inteira já está atrás do login)
     html += '<div class="secao card">' +
       '<h2 style="font-size:16px;margin:0 0 10px">Comentários e identificação</h2>';
-    if (d.textos) {
-      var porSessao = {};
-      d.textos.forEach(function (t) {
-        (porSessao[t.sessao] = porSessao[t.sessao] || {})[t.pergunta_id] = t;
+    var porSessao = {};
+    (d.textos || []).forEach(function (t) {
+      (porSessao[t.sessao] = porSessao[t.sessao] || {})[t.pergunta_id] = t;
+    });
+    var comentarios = (d.textos || []).filter(function (t) { return t.pergunta_id === 'comentario'; });
+    var identificados = Object.keys(porSessao).filter(function (s) { return porSessao[s].ident_nome; });
+    if (comentarios.length) {
+      comentarios.forEach(function (c) {
+        var quem = porSessao[c.sessao] || {};
+        html += '<div class="comentario">' +
+          (quem.ident_nome ? '<span class="autor">' + esc(quem.ident_nome.texto) +
+            (quem.ident_cargo ? ' · ' + esc(quem.ident_cargo.texto) : '') + '</span><br>' : '') +
+          esc(c.texto) +
+          '<div class="quando num">' + new Date(c.criado).toLocaleString('pt-BR') + '</div></div>';
       });
-      var comentarios = d.textos.filter(function (t) { return t.pergunta_id === 'comentario'; });
-      var identificados = Object.keys(porSessao).filter(function (s) { return porSessao[s].ident_nome; });
-      if (comentarios.length) {
-        comentarios.forEach(function (c) {
-          var quem = porSessao[c.sessao] || {};
-          html += '<div class="comentario">' +
-            (quem.ident_nome ? '<span class="autor">' + esc(quem.ident_nome.texto) +
-              (quem.ident_cargo ? ' · ' + esc(quem.ident_cargo.texto) : '') + '</span><br>' : '') +
-            esc(c.texto) +
-            '<div class="quando num">' + new Date(c.criado).toLocaleString('pt-BR') + '</div></div>';
-        });
-      } else if (d.comentariosN > 0) {
-        html += '<p class="metodo erro">Chave incorreta — há comentários, mas não foram liberados.</p>' + campoChave();
-      } else {
-        html += '<p class="metodo">Nenhum comentário ainda.</p>';
-      }
-      if (identificados.length) {
-        html += '<h2 style="font-size:14px;margin:18px 0 4px">Quem se identificou (' + identificados.length + ')</h2>';
-        identificados.forEach(function (s) {
-          var p = porSessao[s];
-          html += '<div class="pessoa"><b>' + esc(p.ident_nome.texto) + '</b>' +
-            (p.ident_cargo ? '<span>' + esc(p.ident_cargo.texto) + '</span>' : '') + '</div>';
-        });
-      }
-    } else if (d.comentariosN > 0) {
-      html += '<p class="metodo">Protegidos por chave — agregados são abertos, texto é restrito.</p>' + campoChave();
     } else {
-      html += '<p class="metodo">Nenhum comentário ainda.</p>' +
-        (chave ? '' : campoChave());
+      html += '<p class="metodo">Nenhum comentário ainda.</p>';
+    }
+    if (identificados.length) {
+      html += '<h2 style="font-size:14px;margin:18px 0 4px">Quem se identificou (' + identificados.length + ')</h2>';
+      identificados.forEach(function (s) {
+        var p = porSessao[s];
+        html += '<div class="pessoa"><b>' + esc(p.ident_nome.texto) + '</b>' +
+          (p.ident_cargo ? '<span>' + esc(p.ident_cargo.texto) + '</span>' : '') + '</div>';
+      });
     }
     html += '</div>';
 
     raiz.innerHTML = html;
     conteudo.replaceChildren(raiz);
-    var f = document.getElementById('form-chave');
-    if (f) f.addEventListener('submit', function (e) {
-      e.preventDefault();
-      chave = f.querySelector('input').value.trim();
-      try { localStorage.setItem('nps_chave', chave); } catch (err) {}
-      carregar();
-    });
   }
 
-  function campoChave() {
-    return '<form class="campo-chave" id="form-chave" style="margin-top:10px">' +
-      '<input type="password" placeholder="Chave de acesso" autocomplete="off">' +
-      '<button type="submit">Liberar</button></form>';
+  function renderLogin(msg) {
+    conteudo.innerHTML =
+      '<div class="card" style="max-width:420px;margin:0 auto">' +
+      '<h2 style="font-size:18px;margin:0 0 4px">Acesso restrito</h2>' +
+      '<p class="metodo" style="margin:0 0 14px">Painel interno da AG — entre pra ver os resultados.</p>' +
+      '<form id="form-login">' +
+      '<input class="campo-login" type="email" name="usuario" placeholder="E-mail" autocomplete="username" required ' +
+        'style="width:100%;font:inherit;font-size:14px;padding:11px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px">' +
+      '<input class="campo-login" type="password" name="senha" placeholder="Senha" autocomplete="current-password" required ' +
+        'style="width:100%;font:inherit;font-size:14px;padding:11px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:14px">' +
+      (msg ? '<p class="metodo erro" style="margin:0 0 12px">' + esc(msg) + '</p>' : '') +
+      '<button type="submit" style="width:100%;font:inherit;font-size:15px;font-weight:700;' +
+        'color:var(--accent-ink);background:var(--accent);border:0;border-radius:8px;padding:12px;cursor:pointer">Entrar</button>' +
+      '</form></div>';
+    quando.textContent = '';
+    document.getElementById('form-login').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var f = e.target;
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: f.usuario.value.trim(), senha: f.senha.value }),
+      })
+        .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, b: b }; }); })
+        .then(function (x) {
+          if (x.ok) { carregar(); return; }
+          renderLogin(x.b && x.b.error ? x.b.error : 'Não foi possível entrar.');
+        })
+        .catch(function () { renderLogin('Falha de conexão — tente de novo.'); });
+    });
   }
 
   function erro(msg) {
@@ -305,9 +313,14 @@
   }
 
   function carregar() {
-    fetch('/api/nps-stats' + (chave ? '?chave=' + encodeURIComponent(chave) : ''))
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    fetch('/api/nps-stats')
+      .then(function (r) {
+        if (r.status === 401) { renderLogin(); return null; }
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
       .then(function (d) {
+        if (!d) return;
         render(d);
         quando.textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR');
       })
@@ -315,7 +328,10 @@
   }
 
   document.getElementById('atualizar').addEventListener('click', carregar);
-  setInterval(carregar, 30000); // acompanha ao vivo durante o evento
+  setInterval(function () {
+    // não recarrega em cima do form de login — apagaria o que está sendo digitado
+    if (!document.getElementById('form-login')) carregar();
+  }, 30000);
   carregar();
 })();
 </script>

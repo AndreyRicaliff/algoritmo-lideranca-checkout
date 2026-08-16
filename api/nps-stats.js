@@ -1,14 +1,18 @@
-// Estatísticas agregadas da pesquisa pro painel interno (/resultados).
-// O banco devolve só o histograma (pergunta × valor × n) — o eNPS, médias e faixas são
-// calculados AQUI, num lugar só, e o front apenas renderiza.
+// Estatísticas da pesquisa pro painel interno (/resultados) — atrás de login.
+// A sessão (cookie HttpOnly) é validada no banco a cada chamada; sem ela nem os
+// agregados saem. O eNPS, médias e faixas são calculados AQUI, num lugar só.
 //
-// Método eNPS: promotores = notas 9-10, neutros = 7-8, detratores = 0-6.
-// eNPS = %promotores − %detratores (inteiro, -100 a +100), sobre a pergunta tipo 'nps'.
-// Demais perguntas são escala 1-5, lidas por média e distribuição.
+// Método eNPS: promotores = 9-10, neutros = 7-8, detratores = 0-6.
+// eNPS = %promotores − %detratores. Demais perguntas: escala 1-5, média e distribuição.
 
 const nps = require('../lib/nps.js');
 
-let cache = { em: 0, dados: null };
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function tokenDoCookie(req) {
+  const m = /(?:^|;\s*)nps_admin=([^;]+)/.exec(req.headers.cookie || '');
+  return m && UUID_RE.test(m[1]) ? m[1] : null;
+}
 
 function resumo(rows) {
   const perguntas = {};
@@ -47,7 +51,6 @@ function resumo(rows) {
     sessoes,
     comentariosN,
     enps: geral && geral.enps !== undefined ? geral.enps : null,
-    // esqueleto das seções pro painel renderizar agrupado na ordem da pesquisa
     secoes: nps.SECOES.map((s) => ({
       id: s.id, titulo: s.titulo,
       perguntas: s.perguntas.map((q) => q.id),
@@ -57,25 +60,24 @@ function resumo(rows) {
 }
 
 module.exports = async function handler(req, res) {
-  const chave = String((req.query && req.query.chave) || '').slice(0, 64);
+  const token = tokenDoCookie(req);
+  res.setHeader('Cache-Control', 'no-store'); // painel autenticado: nada em cache compartilhado
+  if (!token) { res.status(401).json({ error: 'login' }); return; }
   try {
-    let dados = cache.dados;
-    if (!dados || Date.now() - cache.em > 15000) {
-      dados = resumo(await nps.rpc('nps_stats', { p_evento: nps.EVENTO }));
-      cache = { em: Date.now(), dados };
-    }
-    const corpo = Object.assign({}, dados);
-    if (chave) {
-      // Chave errada devolve conjunto vazio (sem oráculo). Vem TUDO que é texto —
-      // identificação e comentário — com a sessão pra ligar as pontas no painel.
-      corpo.textos = await nps.rpc('nps_comentarios', { p_evento: nps.EVENTO, p_chave: chave });
-      res.setHeader('Cache-Control', 'no-store');
-    } else {
-      res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=60');
-    }
+    const [rows, textos] = await Promise.all([
+      nps.rpc('nps_stats', { p_evento: nps.EVENTO, p_token: token }),
+      nps.rpc('nps_textos', { p_evento: nps.EVENTO, p_token: token }),
+    ]);
+    const corpo = resumo(rows);
+    corpo.textos = textos;
     res.status(200).json(corpo);
   } catch (err) {
-    console.error('[nps-stats] falha:', err && err.message);
+    const msg = String(err && err.message);
+    if (msg.indexOf('não autorizado') >= 0) {
+      res.status(401).json({ error: 'login' }); // sessão inválida/expirada -> volta pro login
+      return;
+    }
+    console.error('[nps-stats] falha:', msg);
     res.status(502).json({ error: 'Não foi possível carregar as estatísticas agora.' });
   }
 };
