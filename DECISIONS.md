@@ -77,3 +77,22 @@ pra travar o login por 15min (aceito, painel interno); nps_stats(text) e nps_com
 por token opaco em cookie HttpOnly e autorização dentro de RPC SECURITY DEFINER — o serverless
 é só transporte. O trade-off foi aceitar lockout coletivo de 15min em troca de frear brute
 force numa senha que o cliente reusa."
+
+## 2026-08-17 — [nps] comentários anônimos: o vínculo morre na RPC, não na página
+**Problema:** o painel exibia autor em cima de cada comentário. Ricaliff pediu comentário
+anônimo — mas parar de exibir não basta: `nps_textos` devolvia `sessao` e `created_at` em toda
+linha, então o pareamento comentário↔nome continuava no JSON (F12 desfaz anonimato de fachada).
+**Opções:** A) só remover o autor do HTML (anonimato de fachada) · B) apagar a seção de
+identificação da pesquisa (perde a lista de quem participou, que o dono usa) · C) quebrar o
+vínculo na RPC: comentário sem `sessao`, identificação sem `criado`, ordenação separada.
+**Decisão:** C. **Por quê:** o front deste projeto é território do cliente e já é tratado como
+não-confiável (toda a segurança vive em RPC SECURITY DEFINER); anonimato que só existe no
+`innerHTML` é promessa que o próprio dono quebra abrindo o devtools. Ordem também vaza: array
+cronológico reconstrói o par, então comentário sai por data e identificação em ordem alfabética.
+Data sem hora no comentário — o horário exato entrega quem respondeu em qual momento da sala.
+**Consequências:** a lista "quem se identificou" sobrevive, mas ninguém (nem o dono) consegue
+saber quem escreveu qual comentário — inclusive para as 13 respostas já coletadas; se um dia
+isso for necessário, só com acesso direto a `nps_respostas` no Supabase.
+**Em entrevista (30s):** "Anonimato tem que ser propriedade do dado que sai da API, não do
+template. Movi a quebra do vínculo pra dentro da RPC e cuidei dos canais laterais — ID de
+sessão, timestamp e ordem do array — porque esconder no front é reversível com F12."

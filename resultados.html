@@ -63,7 +63,6 @@
   .campo-chave button { font:inherit; font-size:14px; font-weight:700; color:var(--accent-ink);
     background:var(--accent); border:0; border-radius:8px; padding:10px 18px; cursor:pointer; }
   .comentario { border-top:1px solid var(--border); padding:12px 2px; font-size:14px; line-height:1.5; }
-  .comentario .autor { font-size:12px; color:#b9851f; font-weight:700; }
   .comentario .quando { font-size:11px; color:var(--muted); margin-top:4px; }
   .pessoa { border-top:1px solid var(--border); padding:10px 2px; font-size:14px; }
   .pessoa b { display:block; }
@@ -240,29 +239,35 @@
       html += '</div></div>';
     });
 
-    // identificação + comentários (linha a linha — a página inteira já está atrás do login)
+    // comentários anônimos + lista de quem se identificou, sem ponte entre os dois: o banco
+    // não devolve a sessão do comentário nem o horário da identificação (migration 20260817).
+    // Aqui só não se reintroduz o vínculo — nem por autor, nem por ordem, nem por relógio.
     html += '<div class="secao card">' +
-      '<h2 style="font-size:16px;margin:0 0 10px">Comentários e identificação</h2>';
+      '<h2 style="font-size:16px;margin:0 0 2px">Comentários</h2>' +
+      '<p class="metodo" style="margin:0 0 10px">Anônimos — sem vínculo com quem se identificou.</p>';
+    var comentarios = [];
     var porSessao = {};
     (d.textos || []).forEach(function (t) {
-      (porSessao[t.sessao] = porSessao[t.sessao] || {})[t.pergunta_id] = t;
+      if (t.pergunta_id === 'comentario') comentarios.push(t);
+      else (porSessao[t.sessao] = porSessao[t.sessao] || {})[t.pergunta_id] = t;
     });
-    var comentarios = (d.textos || []).filter(function (t) { return t.pergunta_id === 'comentario'; });
-    var identificados = Object.keys(porSessao).filter(function (s) { return porSessao[s].ident_nome; });
     if (comentarios.length) {
       comentarios.forEach(function (c) {
-        var quem = porSessao[c.sessao] || {};
-        html += '<div class="comentario">' +
-          (quem.ident_nome ? '<span class="autor">' + esc(quem.ident_nome.texto) +
-            (quem.ident_cargo ? ' · ' + esc(quem.ident_cargo.texto) : '') + '</span><br>' : '') +
-          esc(c.texto) +
-          '<div class="quando num">' + new Date(c.criado).toLocaleString('pt-BR') + '</div></div>';
+        // só a data: o horário exato entregaria quem respondeu em qual momento da sala
+        html += '<div class="comentario">' + esc(c.texto) +
+          '<div class="quando num">' + new Date(c.criado).toLocaleDateString('pt-BR') + '</div></div>';
       });
     } else {
       html += '<p class="metodo">Nenhum comentário ainda.</p>';
     }
+    var identificados = Object.keys(porSessao)
+      .filter(function (s) { return porSessao[s].ident_nome; })
+      .sort(function (a, b) {
+        return porSessao[a].ident_nome.texto.localeCompare(porSessao[b].ident_nome.texto, 'pt-BR');
+      });
     if (identificados.length) {
-      html += '<h2 style="font-size:14px;margin:18px 0 4px">Quem se identificou (' + identificados.length + ')</h2>';
+      html += '<h2 style="font-size:14px;margin:18px 0 2px">Quem se identificou (' + identificados.length + ')</h2>' +
+        '<p class="metodo" style="margin:0 0 8px">Ordem alfabética — não acompanha a ordem dos comentários.</p>';
       identificados.forEach(function (s) {
         var p = porSessao[s];
         html += '<div class="pessoa"><b>' + esc(p.ident_nome.texto) + '</b>' +
