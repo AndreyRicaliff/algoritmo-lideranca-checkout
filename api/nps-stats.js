@@ -73,7 +73,7 @@ module.exports = async function handler(req, res) {
     res.status(200).json(corpo);
   } catch (err) {
     const msg = String(err && err.message);
-    if (msg.indexOf('não autorizado') >= 0) {
+    if (err.code === 'NPS01' || /autorizado/.test(msg)) {
       res.status(401).json({ error: 'login' }); // sessão inválida/expirada -> volta pro login
       return;
     }

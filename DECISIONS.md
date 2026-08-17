@@ -96,3 +96,28 @@ isso for necessário, só com acesso direto a `nps_respostas` no Supabase.
 **Em entrevista (30s):** "Anonimato tem que ser propriedade do dado que sai da API, não do
 template. Movi a quebra do vínculo pra dentro da RPC e cuidei dos canais laterais — ID de
 sessão, timestamp e ordem do array — porque esconder no front é reversível com F12."
+
+## 2026-08-17 — [nps] erro roteado por SQLSTATE, porque a mensagem não sobrevive ao canal
+**Problema:** com a sessão expirada, o painel mostrava "Não foi possível carregar as
+estatísticas" (502) em vez de cair na tela de login (401). Causa: o `sb.sh` (Management API)
+**corrompe caractere não-ASCII no envio** — provado com `md5()`: o hash calculado no banco não
+bate com o md5 real da mesma string. As funções ficaram com `n<U+FFFD>o autorizado` gravado, e
+o `indexOf('não autorizado')` do serverless nunca casava. Bug latente desde 16/08: só apareceu
+quando existiu a primeira sessão inválida.
+**Opções:** A) consertar o `sb.sh` (é ferramenta da skill, fora deste repo — não corrige o que
+já está gravado) · B) comparar por substring ASCII (`/autorizado/`) — sobrevive, mas continua
+sendo controle de fluxo por prosa · C) SQLSTATE próprio por erro (NPS01..NPS06) + mensagens
+sem acento, com a substring ASCII só como rede.
+**Decisão:** C. **Por quê:** identidade de erro é contrato entre banco e API — merece um código
+estável, não uma frase em português que atravessa dois sistemas, um deles lossy. Tirar o acento
+das mensagens degrada o pior caso de "roteamento quebrado" para "frase feia no log". As
+migrations que recriam função passam a ser **100% ASCII, comentários inclusive** — não é
+preciosismo, é a única forma de o que está no arquivo ser o que chega no Postgres.
+**Consequências:** `lib/nps.js` expõe `err.code`; `api/nps-stats.js`, `api/login.js` e
+`api/nps.js` decidem por código (os dois últimos tinham o mesmo bug latente, em `'não
+configurado'` e `'indisponível'`). ⚠️ Enquanto o `sb.sh` não for corrigido, **migration com
+acento aplicada por ele chega corrompida** — use o SQL Editor do Supabase ou mantenha ASCII.
+**Em entrevista (30s):** "Um painel dava 502 em vez de pedir login. A causa não estava no
+código: o canal de deploy de migration corrompia UTF-8, então a exceção gravada no banco não
+era byte-idêntica ao literal comparado no Node. Troquei comparação de mensagem por SQLSTATE —
+identidade de erro é contrato, e contrato não pode depender de encoding sobreviver à viagem."

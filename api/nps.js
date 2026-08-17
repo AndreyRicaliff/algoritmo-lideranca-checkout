@@ -56,7 +56,7 @@ module.exports = async function handler(req, res) {
     res.status(200).json({ ok: true });
   } catch (err) {
     const msg = String(err && err.message);
-    if (msg.indexOf('indisponível') >= 0) {
+    if (err.code === 'NPS04' || /indispon/.test(msg)) {
       res.status(409).json({ error: 'A pesquisa foi encerrada.' });
       return;
     }

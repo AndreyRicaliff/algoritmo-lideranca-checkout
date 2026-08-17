@@ -32,11 +32,11 @@ module.exports = async function handler(req, res) {
     res.status(200).json({ ok: true });
   } catch (err) {
     const msg = String(err && err.message);
-    if (msg.indexOf('muitas tentativas') >= 0) {
+    if (err.code === 'NPS03' || /tentativas/.test(msg)) {
       res.status(429).json({ error: 'Muitas tentativas — aguarde 15 minutos.' });
       return;
     }
-    if (msg.indexOf('não configurado') >= 0) {
+    if (err.code === 'NPS02' || /configurado/.test(msg)) {
       res.status(503).json({ error: 'Login ainda não configurado no banco.' });
       return;
     }
