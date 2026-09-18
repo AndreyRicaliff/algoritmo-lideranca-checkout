@@ -11,6 +11,13 @@
 
 ## 🟠 Abertas
 
+- **2026-09-18 — Derrubar o login legado por evento depois da 2ª turma.** `nps_login(text,text,text)`
+  e `nps_sessao_valida(text,uuid)` continuam no banco, junto com as colunas `nps_config.login_user`,
+  `login_senha` e `chave_stats`. Nada do código atual usa: a credencial mora em `nps_painel` desde
+  18/09. Foram mantidas de propósito **durante os dias do evento** para que um rollback do deploy no
+  Vercel volte a funcionar sem depender de migration. Passado 20/09, derrubar as duas funções e as
+  três colunas — enquanto existirem, há um caminho de autenticação paralelo vivo.
+
 - **2026-07-27 — Confirmar a taxa de antecipação do Asaas.** `ASAAS_ANTECIPACAO_AM` está em 1,99%
   a.m. por estimativa, não por leitura do extrato. Afeta todo preço de cartão. Conferir em
   Asaas → Configurações → Taxas e ajustar a env var (não precisa mexer em código).

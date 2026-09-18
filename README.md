@@ -61,3 +61,21 @@ Status: `lead` → `aguardando_pagamento` → `pago` (ou `erro_cobranca`).
 - Base: prod `https://api.asaas.com/v3` · sandbox `https://api-sandbox.asaas.com/v3` · header `access_token`
 - `POST /customers` → `id`; `POST /payments` (PIX `value`; cartão `installmentCount`+`totalValue`) → `invoiceUrl`
 - Webhook `{ event, payment }`; idempotente; responder 2xx.
+
+## Pesquisa de avaliação (eNPS)
+
+Uma pesquisa por dia de evento, cada uma com roteiro próprio.
+
+| Rota | O que é |
+|---|---|
+| `/pesquisa` | wizard que a turma responde. `?e=<slug>` abre uma pesquisa específica; sem parâmetro, o banco resolve a do dia (fuso de Brasília) |
+| `/qr` | cartaz para projetar. `?e=<slug>` gera o QR daquela pesquisa na hora |
+| `/resultados` | painel interno: catálogo das pesquisas, e o eNPS/médias/respostas abertas de cada uma. Exige login |
+
+O questionário **não** fica no código: mora em `nps_config.roteiro` (jsonb) no Supabase AG-Converge.
+A fonte versionada são os JSON de `roteiros/` — ver [`roteiros/README.md`](roteiros/README.md) para
+criar uma pesquisa nova. Criar pesquisa não exige deploy.
+
+Comentários e demais respostas abertas são anônimos **por construção**: o banco devolve a resposta
+aberta sem a sessão e a identificação sem a data, com ordenações independentes, então o vínculo não
+existe nem no JSON que chega ao navegador.
