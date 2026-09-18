@@ -3,7 +3,7 @@
   Versão para colar no WordPress. O pagamento roda no serverless do Vercel (Asaas).
 
   >>> ANTES DE PUBLICAR <<<
-  1. Preço e parcelas vêm de https://algoritmo-lideranca-lead.vercel.app/api/preco —
+  1. Preço e parcelas vêm de https://algoritmo.agconsultorialtda.com/api/preco —
      não editar valores aqui: a regra de lote/taxa vive em lib/preco.js (fonte única).
   2. Imagens: as de assets/ são os criativos sociais (placeholder visual). Suba as imagens
      reais da página na Biblioteca de Mídia do WordPress e troque os src.
@@ -90,7 +90,7 @@
       </div>
 
       <form id="alg-inscricao" class="checkout" method="POST"
-            action="https://algoritmo-lideranca-lead.vercel.app/api/inscrever">
+            action="https://algoritmo.agconsultorialtda.com/api/inscrever">
         <div class="inaugural">2ª Turma · 18 a 20 de setembro</div>
         <h3 style="font-size:20px;margin:0 0 4px">Garanta sua vaga</h3>
         <p style="color:var(--muted);font-size:14px;margin:0 0 16px">Vagas limitadas · Campina Grande</p>
@@ -171,7 +171,7 @@
     // ---- Preço: vem da API, a MESMA regra que gera a cobrança ----
     // O lote vira por data (fuso de Brasília) e o relógio do visitante não é confiável:
     // calcular preço aqui abriria a janela de exibir um valor e cobrar outro.
-    const API = 'https://algoritmo-lideranca-lead.vercel.app/api/preco';
+    const API = 'https://algoritmo.agconsultorialtda.com/api/preco';
     const brl = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const diaBR = iso => iso.slice(8, 10) + '/' + iso.slice(5, 7);
 

@@ -55,7 +55,7 @@
     if (!window.fbq) return;
     var evento = { content_name: 'Algoritmo da Lideranca', currency: 'BRL' };
     var enviar = function () { fbq('track', 'Purchase', evento); };
-    fetch('https://algoritmo-lideranca-lead.vercel.app/api/preco')
+    fetch('https://algoritmo.agconsultorialtda.com/api/preco')
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
       .then(function (t) { evento.value = t.base; }) // aproxima pelo PIX/boleto, o caso dominante
       .catch(function () {})

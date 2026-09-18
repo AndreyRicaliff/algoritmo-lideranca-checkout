@@ -10,6 +10,21 @@ Nada de credencial, dado real de cliente ou caminho de exploracao aqui - nem em 
 migration, nem em doc. Pendencia sensivel vai em `C:\CODE\PENDENCIAS.md`, que e privado. O hook
 `auto-backup` da push automatico, entao o erro se publica sozinho.
 
+## Dominio canonico
+
+**`algoritmo.agconsultorialtda.com`** e o unico endereco a usar em QR, link para participante,
+lead page e qualquer coisa que chegue a olho humano (decidido pelo Ricaliff em 18/09/2026).
+
+- `algoritmo-lideranca-lead.vercel.app` continua respondendo, mas e endereco de infraestrutura:
+  nao entra em QR, cartaz, e-mail nem pagina publicada.
+- `pagamento.agconsultorialtda.com` saiu do DNS em 18/09 e NAO resolve. O site inteiro, checkout
+  incluido, responde no dominio canonico -- mas quem guardou o link antigo quebra.
+- A zona esta na Cloudflare. Subdominio novo = CNAME -> `cname.vercel-dns.com` E o dominio
+  adicionado no projeto Vercel; faltando uma das metades, a Cloudflare devolve 525 (handshake
+  com o origin) e parece "no ar" porque responde com pagina de erro propria.
+- `/qr` monta o QR a partir do dominio em que a propria pagina esta aberta (`location.origin`):
+  abrir o cartaz no dominio certo ja gera o QR certo, nao ha dominio hardcoded a manter.
+
 ## Estado (18/08/2026)
 
 Auditado em todas as refs, inclusive a branch `backup/pre-format-2026-07-10`: **zero chave de
