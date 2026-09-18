@@ -121,8 +121,10 @@
     var destino = base + '/pesquisa?e=' + encodeURIComponent(d.evento);
     var legivel = base.replace(/^https?:\/\//, '') + '/pesquisa';
 
+    // O cartaz nao promete duracao propria: quem diz quanto leva e o subtitulo da pesquisa,
+    // e um numero fixo aqui acabaria contradizendo o formulario projetado na parede.
     sub.textContent = (d.titulo ? d.titulo + ' — ' : '') +
-      'Aponte a câmera do celular — anônimo, menos de 3 minutos.';
+      'Aponte a câmera do celular — resposta anônima.';
 
     palco.innerHTML =
       '<span class="moldura">' + svgDoQr(destino) + '</span>' +
