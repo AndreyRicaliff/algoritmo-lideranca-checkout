@@ -76,15 +76,32 @@
   .erro { color:var(--det); }
   @media (max-width:560px){ .hero { grid-template-columns:1fr; } .enps-num { font-size:52px; }
     .item { grid-template-columns:1fr auto; } .dist { display:none; } }
+  /* catálogo de pesquisas */
+  .pesq { display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center; width:100%;
+    text-align:left; font:inherit; color:inherit; background:var(--bg); border:1px solid var(--border);
+    border-radius:14px; padding:16px 18px; cursor:pointer; margin-bottom:10px; min-width:0;
+    box-shadow:0 6px 18px rgba(20,20,30,.05); }
+  .pesq:hover, .pesq:focus-visible { border-color:var(--accent); outline:none; box-shadow:0 0 0 3px var(--ring); }
+  .pesq .nome { font-size:16px; font-weight:700; display:flex; gap:9px; align-items:center; flex-wrap:wrap; }
+  .pesq .meta { font-size:13px; color:var(--muted); margin-top:4px; }
+  .pesq .contagem { text-align:right; white-space:nowrap; }
+  .pesq .contagem b { font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; display:block; }
+  .pesq .contagem span { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+  .tag { font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px;
+    text-transform:uppercase; letter-spacing:.07em; }
+  .tag.viva { background:#e8f6ee; color:#136c3c; }
+  .tag.fechada { background:var(--soft); color:var(--muted); border:1px solid var(--border); }
+  .tag.rascunho { background:#fdf7e8; color:#7a5b00; }
   @media (prefers-reduced-motion: reduce){ .skeleton { animation:none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <span class="eyebrow">AG Educação · painel interno</span>
-  <h1>Resultados da avaliação</h1>
+  <h1 id="titulo">Resultados da avaliação</h1>
   <p class="sub">
-    <span>O Algoritmo da Liderança · 1ª turma (15–17/08)</span>
+    <button type="button" id="voltar" hidden>← todas as pesquisas</button>
+    <span id="onde">O Algoritmo da Liderança</span>
     <button type="button" id="atualizar">Atualizar</button>
     <span id="quando"></span>
   </p>
@@ -104,6 +121,9 @@
   'use strict';
   var conteudo = document.getElementById('conteudo');
   var quando = document.getElementById('quando');
+  var onde = document.getElementById('onde');
+  var voltar = document.getElementById('voltar');
+  var eventoAtual = null;   // null = catálogo; slug = resultados daquela pesquisa
 
   var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); };
   var brNum = function (v) { return (v === null || v === undefined) ? '—' : v.toLocaleString('pt-BR'); };
@@ -157,12 +177,15 @@
     var raiz = document.createElement('div');
     if (!d.sessoes) {
       raiz.innerHTML = '<div class="aviso">Nenhuma resposta ainda.<br>' +
-        'Projete o QR (<b>/qr</b>) ou compartilhe <b>/pesquisa</b> com a turma.</div>';
+        'Projete o QR (<b>/qr?e=' + esc(d.evento) + '</b>) ou compartilhe ' +
+        '<b>/pesquisa?e=' + esc(d.evento) + '</b> com a turma.</div>';
       conteudo.replaceChildren(raiz);
       return;
     }
     var z = zona(d.enps);
-    var npsQ = d.perguntas.nps_geral;
+    // o id da pergunta de recomendação vem do roteiro daquela pesquisa (cada dia nomeia
+    // a sua), não de um 'nps_geral' fixo como na versão de um evento só
+    var npsQ = d.idNps ? d.perguntas[d.idNps] : null;
 
     var html =
       '<div class="card hero">' +
@@ -214,7 +237,7 @@
       var itens = s.perguntas
         .map(function (id) { return { id: id, q: d.perguntas[id] }; })
         .filter(function (x) { return x.q && x.q.tipo === 'escala'; });
-      var ehNps = s.perguntas.indexOf('nps_geral') >= 0;
+      var ehNps = !!d.idNps && s.perguntas.indexOf(d.idNps) >= 0;
       if (!itens.length && !ehNps) return;
       var partes = s.titulo.split(' · ');
       var titulo = partes.length === 2
@@ -317,26 +340,90 @@
       '<br><br><button type="button" class="sub" onclick="location.reload()" style="font-weight:700;cursor:pointer">Recarregar</button></div>';
   }
 
+  // ---- Catálogo: a tela inicial do painel ----
+  function renderCatalogo(lista) {
+    document.getElementById('titulo').textContent = 'Pesquisas';
+    onde.textContent = 'O Algoritmo da Liderança · painel de avaliações';
+    voltar.hidden = true;
+
+    var raiz = document.createElement('div');
+    if (!lista.length) {
+      raiz.innerHTML = '<div class="aviso">Nenhuma pesquisa cadastrada ainda.</div>';
+      conteudo.replaceChildren(raiz);
+      return;
+    }
+    var html = '';
+    lista.forEach(function (p) {
+      var tag = p.rascunho ? '<span class="tag rascunho">rascunho</span>'
+        : p.aberto ? '<span class="tag viva">coletando</span>'
+        : '<span class="tag fechada">encerrada</span>';
+      var meta = [p.periodo, p.evento].filter(Boolean).join(' · ');
+      html += '<button type="button" class="pesq" data-e="' + esc(p.evento) + '">' +
+        '<span><span class="nome">' + esc(p.titulo) + tag + '</span>' +
+          '<span class="meta">' + esc(meta) + '</span></span>' +
+        '<span class="contagem"><b>' + brNum(p.sessoes) + '</b>' +
+          '<span>' + (p.sessoes === 1 ? 'participante' : 'participantes') + '</span></span>' +
+      '</button>';
+    });
+    raiz.innerHTML = html;
+    raiz.querySelectorAll('.pesq').forEach(function (b) {
+      b.addEventListener('click', function () { abrir(b.dataset.e); });
+    });
+    conteudo.replaceChildren(raiz);
+    quando.textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR');
+  }
+
+  // O slug fica no hash pra dar link direto: o painel de uma pesquisa é favoritável e
+  // o botão voltar do navegador funciona como o esperado.
+  function abrir(e) {
+    eventoAtual = e || null;
+    location.hash = e ? 'e=' + e : '';
+    carregar();
+  }
+
+  function doHash() {
+    var m = /[#&]e=([a-z0-9-]{1,60})/i.exec(location.hash || '');
+    return m ? m[1].toLowerCase() : null;
+  }
+
   function carregar() {
-    fetch('/api/nps-stats')
+    var alvo = eventoAtual;
+    var url = alvo ? '/api/nps-stats?e=' + encodeURIComponent(alvo) : '/api/nps-eventos';
+    fetch(url)
       .then(function (r) {
         if (r.status === 401) { renderLogin(); return null; }
+        if (r.status === 404 && alvo) { abrir(null); return null; }
         if (!r.ok) throw new Error(r.status);
         return r.json();
       })
       .then(function (d) {
         if (!d) return;
+        if (!alvo) { renderCatalogo(d.eventos); return; }
+        document.getElementById('titulo').textContent = d.titulo || 'Resultados da avaliação';
+        onde.textContent = [d.periodo, d.aberto ? 'coletando' : 'encerrada']
+          .filter(Boolean).join(' · ');
+        voltar.hidden = false;
         render(d);
         quando.textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR');
       })
-      .catch(function () { erro('Não foi possível carregar as estatísticas.'); });
+      .catch(function () {
+        erro(alvo ? 'Não foi possível carregar as estatísticas.'
+                  : 'Não foi possível carregar as pesquisas.');
+      });
   }
 
+  voltar.addEventListener('click', function () { abrir(null); });
+  window.addEventListener('hashchange', function () {
+    var h = doHash();
+    if (h !== eventoAtual) { eventoAtual = h; carregar(); }
+  });
   document.getElementById('atualizar').addEventListener('click', carregar);
   setInterval(function () {
     // não recarrega em cima do form de login — apagaria o que está sendo digitado
     if (!document.getElementById('form-login')) carregar();
   }, 30000);
+
+  eventoAtual = doHash();
   carregar();
 })();
 </script>

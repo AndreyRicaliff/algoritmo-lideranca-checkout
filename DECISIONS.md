@@ -1,5 +1,64 @@
 # Decisões — Checkout Algoritmo da Liderança
 
+## 2026-09-18 — [nps] Roteiro da pesquisa no banco, não no código
+**Problema:** a 2ª turma precisa de **uma pesquisa por dia** (18, 19 e 20/09), cada uma com pautas
+próprias. O desenho antigo tinha `const EVENTO` e as seções hardcoded em `lib/nps.js`: criar
+pesquisa exigia deploy, e duas pesquisas simultâneas não tinham como coexistir.
+**Opções:** (A) manter no código, um bloco por pesquisa; (B) roteiro em `jsonb` no banco, criado
+por INSERT; (C) híbrido — catálogo no banco, perguntas no código.
+**Decisão:** (B), com os roteiros versionados como JSON em `roteiros/` e uma migration gerada por
+`scripts/nova-pesquisa.mjs`.
+**Por quê:** (A) põe um deploy entre o Ricaliff e a pesquisa do dia, no dia do evento — o pior
+momento possível para um build falhar. (B) ainda entrega um ganho de segurança que (A) e (C) não
+têm: `nps_gravar` passou a validar a pergunta **contra o roteiro daquela pesquisa**, então pesquisa
+sem roteiro não aceita nada (fail-closed). Antes essa validação só existia no serverless, que um
+`curl` com a anon key pública contorna. Versionar o JSON recupera o que se perderia em (B) puro:
+dá para ver depois exatamente quais perguntas estavam no ar naquele dia.
+**Consequências:** o canal de aplicação (`sb.sh` → Management API) corrompe byte não-ASCII no
+envio, então **todo texto em pt-BR entra como escape `\uXXXX` dentro de JSON** — o gerador force
+isso e aborta se sobrar byte alto. Mudar o texto de uma pergunta sem trocar o `id` reescreve o
+rótulo também no histórico do painel.
+**Em entrevista (30s):** "Tirei o questionário do código e botei no banco, versionando o JSON de
+origem. O que decidiu não foi comodidade: com o roteiro no banco, o próprio `INSERT` vira a
+allowlist que a função de gravação consulta — a validação passou a morar no mesmo lugar que a
+autorização, em vez de num serverless que a anon key pública contorna."
+
+## 2026-09-18 — [nps] Login do painel, não login por evento
+**Problema:** com N pesquisas, a credencial por evento (`nps_config.login_user/senha`) obrigaria a
+logar de novo a cada dia da turma.
+**Opções:** (A) manter por evento; (B) credencial única de painel em `nps_painel`, sessão válida
+para o catálogo inteiro.
+**Decisão:** (B). O hash bcrypt foi **copiado** da linha da 1ª turma, então a senha em uso continua
+valendo e não precisou trafegar nem ser conhecida.
+**Por quê:** o modelo real é "um dono, N pesquisas" — o isolamento por evento não era requisito de
+negócio, era resíduo de quando só existia um evento. E tinha um custo concreto: o freio de
+força-bruta é por evento, então tentar a senha na pesquisa errada queimava tentativas de um evento
+enquanto o acesso real estava no outro, às vésperas do treinamento.
+**Consequências:** `nps_sessao_valida` deixou de receber evento; um token vale para qualquer
+pesquisa do catálogo. Aceitável porque só existe um dono. Se um dia houver cliente vendo só a
+própria turma, isso volta a ser escopo por evento — e aí o certo é papel na sessão, não credencial
+duplicada por linha.
+**Em entrevista (30s):** "Autenticação seguia o modelo de dados em vez do modelo de acesso. Quem
+loga é o dono do painel, não o evento — deixei a sessão no nível certo e a credencial parou de ser
+replicada por linha."
+
+## 2026-09-18 — [nps] Rascunho do wizard isolado por pesquisa no localStorage
+**Problema:** o wizard guardava respostas em chaves globais (`nps_respostas`, `nps_fila`,
+`nps_sessao`). Com uma pesquisa por dia, a mesma pessoa lendo o QR do dia 19 no mesmo celular
+traria as respostas do dia 18 já preenchidas.
+**Opções:** (A) limpar o storage ao detectar pesquisa diferente; (B) prefixar toda chave com o
+slug da pesquisa.
+**Decisão:** (B) — `nps:<evento>:respostas`.
+**Por quê:** (A) destrói o rascunho de quem legitimamente voltou para terminar a pesquisa de
+ontem. (B) faz as duas coexistirem. O efeito de (A) seria silencioso e grave: o wizard considera
+"todas as seções respondidas" e pula direto para a tela de agradecimento — a pessoa acha que
+avaliou o dia 19 e **nada foi coletado**.
+**Consequências:** o estado só pode ser montado depois que o roteiro chega (é ele que diz qual é a
+pesquisa), então a inicialização saiu do topo do script para dentro do `carregar()`.
+**Em entrevista (30s):** "Estado de cliente também precisa de chave de particionamento. Sem o slug
+no prefixo, o rascunho de um dia se passava por resposta completa do outro e a coleta sumia sem
+erro nenhum."
+
 ## 2026-07-27 — [preço] Fonte única de preço em vez de constante replicada
 **Problema:** a 2ª turma tem preço que muda por data (R$ 1.280,50 até 31/07, R$ 1.977,00 a partir
 de 01/08). O preço vivia duplicado em 4 arquivos (dois backends e dois fronts).

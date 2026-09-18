@@ -1,0 +1,204 @@
+{
+  "evento": "alg-lideranca-2026-t1",
+  "titulo": "Turma 1",
+  "periodo": "15-17/08/2026",
+  "dia": "2026-08-16",
+  "aberto": false,
+  "escalaRotulos": [
+    "Muito ruim",
+    "Ruim",
+    "Regular",
+    "Bom",
+    "Excelente"
+  ],
+  "secoes": [
+    {
+      "id": "identificacao",
+      "titulo": "Identificação",
+      "sub": "Opcional — pode pular sem responder.",
+      "perguntas": [
+        {
+          "id": "ident_nome",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Nome"
+        },
+        {
+          "id": "ident_cargo",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Área / cargo"
+        }
+      ]
+    },
+    {
+      "id": "nucleo",
+      "titulo": "O Núcleo · O líder por dentro",
+      "sub": "Como você avalia cada pauta?",
+      "perguntas": [
+        {
+          "id": "p_dna",
+          "tipo": "escala",
+          "texto": "O DNA da sua Liderança"
+        },
+        {
+          "id": "p_autocuidado",
+          "tipo": "escala",
+          "texto": "Autocuidado, Energia e Longevidade"
+        },
+        {
+          "id": "p_decisao",
+          "tipo": "escala",
+          "texto": "Decisão sob Pressão"
+        },
+        {
+          "id": "p_foco",
+          "tipo": "escala",
+          "texto": "Foco no que Gera Resultado"
+        }
+      ]
+    },
+    {
+      "id": "conexoes",
+      "titulo": "As Conexões · O líder e o time",
+      "sub": "Como você avalia cada pauta?",
+      "perguntas": [
+        {
+          "id": "p_presenca",
+          "tipo": "escala",
+          "texto": "Presença e Influência"
+        },
+        {
+          "id": "p_conversas",
+          "tipo": "escala",
+          "texto": "Conversas Difíceis, Relações Fortes"
+        },
+        {
+          "id": "p_feedback",
+          "tipo": "escala",
+          "texto": "Feedback que Desenvolve"
+        },
+        {
+          "id": "p_conflito",
+          "tipo": "escala",
+          "texto": "Do Conflito ao Acordo"
+        }
+      ]
+    },
+    {
+      "id": "escala_org",
+      "titulo": "A Escala · O líder e a organização",
+      "sub": "Como você avalia cada pauta?",
+      "perguntas": [
+        {
+          "id": "p_time",
+          "tipo": "escala",
+          "texto": "Formando o Time"
+        },
+        {
+          "id": "p_cultura",
+          "tipo": "escala",
+          "texto": "Cultura e Clima Organizacional"
+        },
+        {
+          "id": "p_visao",
+          "tipo": "escala",
+          "texto": "Visão Estratégica"
+        },
+        {
+          "id": "p_vendedor",
+          "tipo": "escala",
+          "texto": "O Líder Vendedor"
+        }
+      ]
+    },
+    {
+      "id": "bonus",
+      "titulo": "Bônus · O líder e o futuro",
+      "sub": "Como você avalia a pauta?",
+      "perguntas": [
+        {
+          "id": "p_ia",
+          "tipo": "escala",
+          "texto": "IA para a Gestão"
+        }
+      ]
+    },
+    {
+      "id": "materiais",
+      "titulo": "Materiais",
+      "sub": null,
+      "perguntas": [
+        {
+          "id": "m_apostila",
+          "tipo": "escala",
+          "texto": "Qualidade da apostila"
+        },
+        {
+          "id": "m_clareza",
+          "tipo": "escala",
+          "texto": "Clareza e organização do conteúdo"
+        },
+        {
+          "id": "m_utilidade",
+          "tipo": "escala",
+          "texto": "Utilidade para o dia a dia"
+        }
+      ]
+    },
+    {
+      "id": "experiencia",
+      "titulo": "Experiência geral",
+      "sub": null,
+      "perguntas": [
+        {
+          "id": "e_facilitador",
+          "tipo": "escala",
+          "texto": "Facilitador(es) / condução"
+        },
+        {
+          "id": "e_ritmo",
+          "tipo": "escala",
+          "texto": "Ritmo e duração"
+        },
+        {
+          "id": "e_logistica",
+          "tipo": "escala",
+          "texto": "Organização e logística"
+        },
+        {
+          "id": "e_aplicabilidade",
+          "tipo": "escala",
+          "texto": "Aplicabilidade no seu trabalho"
+        }
+      ]
+    },
+    {
+      "id": "nps",
+      "titulo": "Recomendação",
+      "sub": "0–6 detrator · 7–8 neutro · 9–10 promotor",
+      "perguntas": [
+        {
+          "id": "nps_geral",
+          "tipo": "nps",
+          "texto": "De 0 a 10, o quanto você recomendaria este treinamento a um colega?",
+          "min": "Não recomendaria",
+          "max": "Com certeza"
+        }
+      ]
+    },
+    {
+      "id": "comentario",
+      "titulo": "Comentário",
+      "sub": "Opcional.",
+      "perguntas": [
+        {
+          "id": "comentario",
+          "tipo": "texto",
+          "max": 1000,
+          "texto": "O que mais te marcou e o que podemos melhorar?"
+        }
+      ]
+    }
+  ]
+}

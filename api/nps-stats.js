@@ -1,20 +1,17 @@
-// Estatísticas da pesquisa pro painel interno (/resultados) — atrás de login.
+// Estatísticas de UMA pesquisa pro painel interno (/resultados) — atrás de login.
 // A sessão (cookie HttpOnly) é validada no banco a cada chamada; sem ela nem os
 // agregados saem. O eNPS, médias e faixas são calculados AQUI, num lugar só.
 //
 // Método eNPS: promotores = 9-10, neutros = 7-8, detratores = 0-6.
 // eNPS = %promotores − %detratores. Demais perguntas: escala 1-5, média e distribuição.
+//
+// Os rótulos (texto da pergunta, títulos de seção) vêm do roteiro da própria pesquisa,
+// não de uma constante: cada dia da turma tem pautas diferentes, e o painel de uma
+// pesquisa antiga precisa continuar mostrando os textos que ELA usou.
 
 const nps = require('../lib/nps.js');
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function tokenDoCookie(req) {
-  const m = /(?:^|;\s*)nps_admin=([^;]+)/.exec(req.headers.cookie || '');
-  return m && UUID_RE.test(m[1]) ? m[1] : null;
-}
-
-function resumo(rows) {
+function resumo(rows, roteiro) {
   const perguntas = {};
   let sessoes = 0;
   let comentariosN = 0;
@@ -29,6 +26,11 @@ function resumo(rows) {
     q.n += n;
     q.soma += valor * n;
   }
+
+  const secoes = (roteiro && roteiro.secoes) || [];
+  const meta = {};
+  for (const s of secoes) for (const q of s.perguntas) meta[q.id] = q.texto;
+
   for (const id of Object.keys(perguntas)) {
     const q = perguntas[id];
     q.media = q.n ? Math.round((q.soma / q.n) * 100) / 100 : null;
@@ -42,16 +44,20 @@ function resumo(rows) {
       q.detratores = det; q.neutros = neu; q.promotores = pro;
       q.enps = q.n ? Math.round(((pro - det) / q.n) * 100) : null;
     }
-    const meta = nps.PERGUNTAS.find((p) => p.id === id);
-    q.texto = meta ? meta.texto : id;
+    q.texto = meta[id] || id;
   }
-  const geral = perguntas.nps_geral;
+
+  // eNPS da pesquisa = o da primeira pergunta tipo 'nps' do roteiro. Não fixa mais o id
+  // 'nps_geral': cada dia pode nomear a sua como quiser.
+  const idNps = Object.keys(perguntas).find((id) => perguntas[id].tipo === 'nps');
+  const geral = idNps ? perguntas[idNps] : null;
+
   return {
-    evento: nps.EVENTO,
     sessoes,
     comentariosN,
+    idNps: idNps || null,
     enps: geral && geral.enps !== undefined ? geral.enps : null,
-    secoes: nps.SECOES.map((s) => ({
+    secoes: secoes.map((s) => ({
       id: s.id, titulo: s.titulo,
       perguntas: s.perguntas.map((q) => q.id),
     })),
@@ -60,15 +66,25 @@ function resumo(rows) {
 }
 
 module.exports = async function handler(req, res) {
-  const token = tokenDoCookie(req);
+  const token = nps.tokenDoCookie(req);
   res.setHeader('Cache-Control', 'no-store'); // painel autenticado: nada em cache compartilhado
   if (!token) { res.status(401).json({ error: 'login' }); return; }
+
+  const evento = nps.eventoDaQuery(req);
+  if (!evento) { res.status(400).json({ error: 'Pesquisa não informada.' }); return; }
+
   try {
-    const [rows, textos] = await Promise.all([
-      nps.rpc('nps_stats', { p_evento: nps.EVENTO, p_token: token }),
-      nps.rpc('nps_textos', { p_evento: nps.EVENTO, p_token: token }),
+    const [rows, textos, cfg] = await Promise.all([
+      nps.rpc('nps_stats', { p_evento: evento, p_token: token }),
+      nps.rpc('nps_textos', { p_evento: evento, p_token: token }),
+      nps.rpc('nps_roteiro', { p_evento: evento }),
     ]);
-    const corpo = resumo(rows);
+    if (!cfg) { res.status(404).json({ error: 'Pesquisa não encontrada.' }); return; }
+    const corpo = resumo(rows, cfg.roteiro);
+    corpo.evento = cfg.evento;
+    corpo.titulo = cfg.titulo;
+    corpo.periodo = cfg.periodo;
+    corpo.aberto = cfg.aberto;
     corpo.textos = textos;
     res.status(200).json(corpo);
   } catch (err) {

@@ -1,30 +1,22 @@
-// Login do painel /resultados. Credencial mora no banco (bcrypt em nps_config) e a
+// Login do painel /resultados. Credencial mora no banco (bcrypt em nps_painel) e a
 // validação acontece na RPC nps_login — aqui só transporte: acertou, o token de sessão
 // (30 dias) vira cookie HttpOnly e nenhum JS da página consegue lê-lo.
+//
+// A sessão é DO PAINEL, não de uma pesquisa (migration 20260918): um login abre o
+// catálogo inteiro. Antes era por evento, o que obrigaria a logar de novo a cada dia da
+// turma — e cada senha errada num evento alimentava o freio de força-bruta do outro.
 
 const nps = require('../lib/nps.js');
 
-async function readBody(req) {
-  if (req.body && typeof req.body === 'object') return req.body;
-  const raw = await new Promise((resolve) => {
-    let d = '';
-    req.on('data', (c) => (d += c));
-    req.on('end', () => resolve(d));
-  });
-  try { return JSON.parse(raw || '{}'); } catch (e) { return {}; }
-}
-
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).json({ error: 'method not allowed' }); return; }
-  const p = await readBody(req);
+  const p = await nps.readBody(req);
   const usuario = String(p.usuario || '').trim().slice(0, 120);
   const senha = String(p.senha || '').slice(0, 120);
   if (!usuario || !senha) { res.status(400).json({ error: 'Informe usuário e senha.' }); return; }
 
   try {
-    const token = await nps.rpc('nps_login', {
-      p_evento: nps.EVENTO, p_usuario: usuario, p_senha: senha,
-    });
+    const token = await nps.rpc('nps_login', { p_usuario: usuario, p_senha: senha });
     if (!token) { res.status(401).json({ error: 'Usuário ou senha incorretos.' }); return; }
     res.setHeader('Set-Cookie',
       'nps_admin=' + token + '; Path=/; Max-Age=' + 30 * 86400 +

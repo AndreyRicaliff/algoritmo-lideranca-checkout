@@ -79,7 +79,7 @@
 <div class="wrap">
   <span class="eyebrow">AG Educação · O Algoritmo da Liderança</span>
   <h1>Avaliação do treinamento</h1>
-  <p class="sub">1ª turma · leva menos de 3 minutos · anônima (identificar-se é opcional)</p>
+  <p class="sub" id="sub">leva menos de 3 minutos · anônima (identificar-se é opcional)</p>
   <div class="progress" aria-hidden="true"><b id="barra"></b></div>
   <div id="palco"><div class="skeleton"></div></div>
   <input class="hp" id="hp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -94,7 +94,10 @@
   var secoes = [];
   var rotulos = [];
   var passo = 0;
+  var evento = null;      // slug da pesquisa; só se sabe depois de carregar o roteiro
   var sessao = null;
+  var respostas = {};
+  var fila = [];
 
   function ls(chave, valor) {
     try {
@@ -104,17 +107,26 @@
     } catch (e) { return null; } // modo privado sem storage: segue sem persistência
   }
 
-  sessao = ls('nps_sessao');
-  if (!sessao) sessao = ls('nps_sessao', (crypto.randomUUID && crypto.randomUUID()) ||
-    'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, function () {
-      return Math.floor(Math.random() * 16).toString(16);
-    }));
-  var respostas = ls('nps_respostas') || {};
-  var fila = ls('nps_fila') || [];
+  // TODA chave de storage é prefixada pela pesquisa. Sem isso, a mesma pessoa lendo o QR
+  // do dia 19 no mesmo celular traria as respostas do dia 18 já preenchidas — o wizard
+  // consideraria tudo respondido e pularia direto pro "Obrigado", sem coletar nada.
+  function chave(base) { return 'nps:' + evento + ':' + base; }
+
+  // Estado é por pesquisa, então só dá pra montar depois que o roteiro diz qual é ela.
+  function iniciarEstado() {
+    sessao = ls(chave('sessao'));
+    if (!sessao) sessao = ls(chave('sessao'), (crypto.randomUUID && crypto.randomUUID()) ||
+      'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, function () {
+        return Math.floor(Math.random() * 16).toString(16);
+      }));
+    respostas = ls(chave('respostas')) || {};
+    fila = ls(chave('fila')) || [];
+  }
 
   // ---- Envio: cada resposta vai na hora; falhou, entra na fila e tenta depois ----
   function enviar(item) {
     item.sessao = sessao;
+    item.evento = evento; // a resposta diz a que pesquisa pertence; o banco confere
     item.site = document.getElementById('hp').value; // honeypot viaja junto
     return fetch('/api/nps', {
       method: 'POST', keepalive: true,
@@ -128,7 +140,7 @@
     enviar(item).catch(function () {
       fila = fila.filter(function (f) { return f.pergunta_id !== item.pergunta_id; });
       fila.push(item);
-      ls('nps_fila', fila);
+      ls(chave('fila'), fila);
       renderFila();
     });
   }
@@ -136,9 +148,9 @@
     if (!fila.length) return;
     var pendentes = fila.slice();
     fila = [];
-    ls('nps_fila', fila);
+    ls(chave('fila'), fila);
     pendentes.forEach(function (i) {
-      enviar(i).catch(function () { fila.push(i); ls('nps_fila', fila); renderFila(); });
+      enviar(i).catch(function () { fila.push(i); ls(chave('fila'), fila); renderFila(); });
     });
     renderFila();
   }
@@ -148,9 +160,10 @@
     if (document.visibilityState === 'hidden' && fila.length && navigator.sendBeacon) {
       fila.forEach(function (i) {
         i.sessao = sessao;
+        i.evento = evento;
         navigator.sendBeacon('/api/nps', new Blob([JSON.stringify(i)], { type: 'application/json' }));
       });
-      fila = []; ls('nps_fila', fila);
+      fila = []; ls(chave('fila'), fila);
     }
   });
 
@@ -243,10 +256,10 @@
       if (q.tipo === 'escala') b.title = rotulos[v - 1];
       b.setAttribute('aria-pressed', String(respostas[q.id] === v));
       b.onclick = function () {
-        respostas[q.id] = v; ls('nps_respostas', respostas);
+        respostas[q.id] = v; ls(chave('respostas'), respostas);
         chips.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
         b.setAttribute('aria-pressed', 'true');
-        despachar({ pergunta_id: q.id, valor: v });
+        despachar({ pergunta_id: q.id, tipo: q.tipo, valor: v });
       };
       chips.appendChild(b);
     })(v);
@@ -286,8 +299,8 @@
       if (!campo) return;
       var v = campo.value.trim();
       if (v && v !== respostas[q.id]) {
-        respostas[q.id] = v; ls('nps_respostas', respostas);
-        despachar({ pergunta_id: q.id, texto: v.slice(0, q.max || 1000) });
+        respostas[q.id] = v; ls(chave('respostas'), respostas);
+        despachar({ pergunta_id: q.id, tipo: 'texto', texto: v.slice(0, q.max || 1000) });
       }
     });
   }
@@ -320,11 +333,41 @@
     palco.replaceChildren(div);
   }
 
+  function encerrada(titulo) {
+    barra.style.width = '100%';
+    var div = document.createElement('div');
+    div.className = 'card estado';
+    div.innerHTML =
+      '<h2>Avaliação encerrada</h2>' +
+      '<p>' + (titulo ? esc(titulo) + ' já foi ' : 'Esta avaliação já foi ') +
+      'fechada — obrigado por participar!</p>' +
+      '<p><b>AG Educação · O Algoritmo da Liderança</b></p>';
+    palco.replaceChildren(div);
+  }
+
   function carregar() {
     palco.innerHTML = '<div class="skeleton"></div>';
-    fetch('/api/nps-perguntas')
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    // ?e=<slug> aponta uma pesquisa específica (é o que o QR de cada dia carrega).
+    // Sem parâmetro, o banco resolve a pesquisa do dia em Brasília.
+    var m = /[?&]e=([a-z0-9-]{1,60})(?:&|$)/i.exec(location.search);
+    var url = '/api/nps-perguntas' + (m ? '?e=' + encodeURIComponent(m[1].toLowerCase()) : '');
+    fetch(url)
+      .then(function (r) {
+        if (r.status === 404) return r.json().then(function () { return null; });
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
       .then(function (d) {
+        if (!d) { encerrada(null); return; }
+        evento = d.evento;
+        iniciarEstado();             // só agora as chaves de storage existem, já por pesquisa
+        if (!d.aberto) { encerrada(d.titulo); return; }
+
+        var sub = document.getElementById('sub');
+        if (sub) {
+          sub.textContent = (d.titulo ? d.titulo + ' · ' : '') +
+            'leva menos de 3 minutos · anônima (identificar-se é opcional)';
+        }
         secoes = d.secoes;
         rotulos = d.escalaRotulos;
         // reabriu? retoma na primeira seção com pergunta em aberto (identificação não conta)
