@@ -29,12 +29,22 @@ function resumo(rows, roteiro) {
 
   const secoes = (roteiro && roteiro.secoes) || [];
   const meta = {};
-  for (const s of secoes) for (const q of s.perguntas) meta[q.id] = q.texto;
+  const opcoes = {};
+  for (const s of secoes) {
+    for (const q of s.perguntas) {
+      meta[q.id] = q.texto;
+      if (Array.isArray(q.opcoes)) opcoes[q.id] = q.opcoes;
+    }
+  }
 
   for (const id of Object.keys(perguntas)) {
     const q = perguntas[id];
-    q.media = q.n ? Math.round((q.soma / q.n) * 100) / 100 : null;
+    // Média só faz sentido onde o número tem ordem. Em 'opcao' o valor é o ÍNDICE do rótulo
+    // escolhido: a média entre "cansado" e "exausto" não existe, e publicá-la convidaria a
+    // ler como nota. Escolha única se lê por distribuição, nunca por média.
+    q.media = q.tipo !== 'opcao' && q.n ? Math.round((q.soma / q.n) * 100) / 100 : null;
     delete q.soma;
+    if (opcoes[id]) q.opcoes = opcoes[id];
     if (q.tipo === 'nps') {
       let det = 0, neu = 0, pro = 0;
       for (let v = 0; v <= 10; v++) {
@@ -59,6 +69,7 @@ function resumo(rows, roteiro) {
     // rótulo de TODA pergunta, inclusive as de texto — o painel precisa saber de qual
     // pergunta aberta veio cada resposta quando o roteiro tem mais de uma
     rotulos: meta,
+    opcoes,
     enps: geral && geral.enps !== undefined ? geral.enps : null,
     secoes: secoes.map((s) => ({
       id: s.id, titulo: s.titulo,

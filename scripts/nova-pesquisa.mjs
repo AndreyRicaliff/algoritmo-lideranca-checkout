@@ -50,8 +50,21 @@ for (const s of r.secoes || []) {
     } else {
       ids.set(q.id, s.id);
     }
-    if (!['escala', 'nps', 'texto'].includes(q.tipo)) {
-      erros.push(`pergunta "${q.id}": tipo deve ser escala, nps ou texto`);
+    if (!['escala', 'nps', 'texto', 'opcao'].includes(q.tipo)) {
+      erros.push(`pergunta "${q.id}": tipo deve ser escala, nps, texto ou opcao`);
+    }
+    if (q.tipo === 'opcao') {
+      // O valor gravado é o ÍNDICE da opção. Duas opções iguais viram duas barras
+      // indistinguíveis no painel, e uma lista curta demais não é escolha.
+      if (!Array.isArray(q.opcoes) || q.opcoes.length < 2) {
+        erros.push(`pergunta "${q.id}": opcao precisa de pelo menos 2 opcoes`);
+      } else if (q.opcoes.length > 50) {
+        erros.push(`pergunta "${q.id}": no máximo 50 opções`);
+      } else if (new Set(q.opcoes).size !== q.opcoes.length) {
+        erros.push(`pergunta "${q.id}": opções repetidas`);
+      }
+    } else if (q.opcoes) {
+      erros.push(`pergunta "${q.id}": só pergunta do tipo opcao pode ter "opcoes"`);
     }
     if (q.tipo === 'nps') nNps++;
     if (!q.texto) erros.push(`pergunta "${q.id}": sem texto`);
@@ -66,18 +79,34 @@ if (erros.length) {
 }
 
 // ---- geração ----
-const roteiro = { escalaRotulos: r.escalaRotulos, secoes: r.secoes };
-const ascii = JSON.stringify(roteiro).replace(
-  /[-￿]/g,
-  (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')
-);
+// Escapa todo caractere fora do ASCII como \uXXXX. Feito caractere a caractere de
+// proposito: uma classe de regex com escapes unicode ja chegou a virar caractere de
+// controle literal neste arquivo -- funciona igual ate alguem normalizar os bytes, e
+// ai o escape para de acontecer EM SILENCIO e o acento cru vai pro canal que corrompe.
+// Assim o codigo-fonte deste gerador e 100% ASCII e nao tem como se auto-sabotar.
+const BARRA = String.fromCharCode(92);   // a barra invertida, sem escrever barra no fonte
+const paraAscii = (str) => {
+  let out = '';
+  for (const ch of String(str)) {
+    const code = ch.codePointAt(0);
+    out += code > 127 ? BARRA + 'u' + code.toString(16).padStart(4, '0') : ch;
+  }
+  return out;
+};
+const temNaoAscii = (str) => {
+  for (const ch of String(str)) if (ch.codePointAt(0) > 127) return true;
+  return false;
+};
+
+
+const roteiro = { subtitulo: r.subtitulo || null, escalaRotulos: r.escalaRotulos, secoes: r.secoes };
+const ascii = paraAscii(JSON.stringify(roteiro));
 const txt = (v) => (v === null || v === undefined ? 'null' : "'" + String(v).replace(/'/g, "''") + "'");
 const txtAscii = (v) => {
   if (v === null || v === undefined) return 'null';
   // metadados também podem ter acento (título "2ª turma"): entram via JSON escapado e
   // saem com ->>0, o mesmo truque do roteiro.
-  const j = JSON.stringify(String(v)).replace(/[-￿]/g, (c) =>
-    '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'));
+  const j = paraAscii(JSON.stringify(String(v)));
   return "(" + txt(j) + "::jsonb ->> 0)";
 };
 
@@ -115,7 +144,7 @@ on conflict (evento) do update set
 commit;
 `;
 
-if (/[^\x00-\x7F]/.test(sql)) {
+if (temNaoAscii(sql)) {
   console.error('BUG: a migration gerada tem byte nao-ASCII — nao aplique.');
   process.exit(1);
 }

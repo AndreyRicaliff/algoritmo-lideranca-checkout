@@ -8,7 +8,10 @@
 
 const nps = require('../lib/nps.js');
 
-const TIPOS = { nps: [0, 10], escala: [1, 5] };
+// Faixa conferida aqui. Para 'opcao' o limite real é quantas opções aquela pergunta tem,
+// coisa que só o roteiro sabe — então aqui vai só um teto de sanidade e quem recusa índice
+// inexistente é a RPC (NPS08), contra o roteiro da própria pesquisa.
+const TIPOS = { nps: [0, 10], escala: [1, 5], opcao: [0, 49] };
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).json({ error: 'method not allowed' }); return; }
@@ -54,6 +57,10 @@ module.exports = async function handler(req, res) {
     const msg = String(err && err.message);
     if (err.code === 'NPS04' || /indispon/.test(msg)) {
       res.status(409).json({ error: 'A pesquisa foi encerrada.' });
+      return;
+    }
+    if (err.code === 'NPS08' || /opcao inexistente/.test(msg)) {
+      res.status(400).json({ error: 'Opção não faz parte desta pergunta.' });
       return;
     }
     if (err.code === 'NPS05' || /pergunta inval/.test(msg)) {

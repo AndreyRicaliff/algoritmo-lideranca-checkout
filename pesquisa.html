@@ -43,6 +43,20 @@
   .chips button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent);
     color:var(--accent-ink); }
   .extremos { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:8px; }
+  /* escolha única: rótulo por extenso, um por linha — texto longo não cabe em chip */
+  .opcoes { display:flex; flex-direction:column; gap:8px; }
+  .opcoes button { display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    font:inherit; font-size:15px; line-height:1.35; color:var(--text); background:var(--soft);
+    border:1px solid var(--border); border-radius:10px; padding:13px 14px; min-height:48px;
+    cursor:pointer; transition:background .15s,border-color .15s,transform .1s; }
+  .opcoes button::before { content:""; flex:0 0 auto; width:18px; height:18px; border-radius:50%;
+    border:2px solid var(--border); background:var(--bg); transition:border-color .15s,box-shadow .15s; }
+  .opcoes button:active { transform:scale(.99); }
+  .opcoes button:focus-visible { outline:3px solid var(--ring); outline-offset:1px; }
+  .opcoes button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent);
+    color:var(--accent-ink); font-weight:700; }
+  .opcoes button[aria-pressed="true"]::before { border-color:var(--accent-ink);
+    box-shadow:inset 0 0 0 4px var(--accent-ink); background:var(--accent); }
   input.field, textarea.field { width:100%; padding:12px 13px; font:inherit; font-size:15px;
     color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:10px; }
   textarea.field { min-height:120px; resize:vertical; }
@@ -70,7 +84,7 @@
   .rodape { text-align:center; color:var(--muted); font-size:12px; margin-top:24px; }
   .hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
   @media (prefers-reduced-motion: reduce) {
-    .progress b, .chips button { transition:none; }
+    .progress b, .chips button, .opcoes button { transition:none; }
     .skeleton { animation:none; }
   }
 </style>
@@ -78,7 +92,7 @@
 <body>
 <div class="wrap">
   <span class="eyebrow">AG Educação · O Algoritmo da Liderança</span>
-  <h1>Avaliação do treinamento</h1>
+  <h1 id="titulo">Avaliação do treinamento</h1>
   <p class="sub" id="sub">leva menos de 3 minutos · anônima (identificar-se é opcional)</p>
   <div class="progress" aria-hidden="true"><b id="barra"></b></div>
   <div id="palco"><div class="skeleton"></div></div>
@@ -210,6 +224,7 @@
 
     s.perguntas.forEach(function (q) {
       if (q.tipo === 'texto') return campoTexto(card, q, s.id === 'comentario');
+      if (q.tipo === 'opcao') return linhaOpcao(card, q);
       linhaEscala(card, q);
     });
 
@@ -272,6 +287,41 @@
       ex.children[1].textContent = ate + ' · ' + (q.max || '');
       linha.appendChild(ex);
     }
+    card.appendChild(linha);
+  }
+
+  // Escolha única: rótulos por extenso, um por linha. O que viaja é o ÍNDICE da opção
+  // (mesma coluna smallint das escalas), e o banco recusa índice fora do roteiro.
+  // Botão em vez de radio nativo: alvo grande, que é o que importa num celular na sala.
+  function linhaOpcao(card, q) {
+    var linha = document.createElement('div');
+    linha.className = 'linha';
+    var t = document.createElement('p');
+    t.className = 'titulo';
+    t.textContent = q.texto;
+    linha.appendChild(t);
+
+    var caixa = document.createElement('div');
+    caixa.className = 'opcoes';
+    caixa.setAttribute('role', 'group');
+    caixa.setAttribute('aria-label', q.texto);
+
+    (q.opcoes || []).forEach(function (rotulo, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opcao';
+      b.textContent = rotulo;
+      b.setAttribute('aria-pressed', String(respostas[q.id] === i));
+      b.onclick = function () {
+        respostas[q.id] = i; ls(chave('respostas'), respostas);
+        caixa.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+        b.setAttribute('aria-pressed', 'true');
+        despachar({ pergunta_id: q.id, tipo: 'opcao', valor: i });
+      };
+      caixa.appendChild(b);
+    });
+
+    linha.appendChild(caixa);
     card.appendChild(linha);
   }
 
@@ -363,10 +413,15 @@
         iniciarEstado();             // só agora as chaves de storage existem, já por pesquisa
         if (!d.aberto) { encerrada(d.titulo); return; }
 
+        // Título e subtítulo vêm da pesquisa: cada módulo se apresenta com as próprias
+        // palavras, em vez de um texto genérico que não diz o que a pessoa vai avaliar.
+        var elTitulo = document.getElementById('titulo');
+        if (elTitulo && d.titulo) elTitulo.textContent = d.titulo;
         var sub = document.getElementById('sub');
         if (sub) {
-          sub.textContent = (d.titulo ? d.titulo + ' · ' : '') +
-            'leva menos de 3 minutos · anônima (identificar-se é opcional)';
+          sub.textContent = d.subtitulo ||
+            ((d.titulo ? d.titulo + ' · ' : '') +
+             'leva menos de 3 minutos · anônima (identificar-se é opcional)');
         }
         secoes = d.secoes;
         rotulos = d.escalaRotulos;

@@ -20,6 +20,7 @@ module.exports = async function handler(req, res) {
       titulo: d.titulo,
       periodo: d.periodo,
       aberto: d.aberto,
+      subtitulo: (d.roteiro && d.roteiro.subtitulo) || null,
       escalaRotulos: (d.roteiro && d.roteiro.escalaRotulos) || [],
       secoes: (d.roteiro && d.roteiro.secoes) || [],
     });

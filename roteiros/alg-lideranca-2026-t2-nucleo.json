@@ -1,0 +1,205 @@
+{
+  "evento": "alg-lideranca-2026-t2-nucleo",
+  "titulo": "Avaliação · Módulo O Núcleo",
+  "subtitulo": "O líder por dentro · Menos de 2 minutos. Resposta anônima (identificação opcional). O que você responder aqui a gente ajusta ainda hoje, para amanhã.",
+  "periodo": "18/09/2026",
+  "dia": "2026-09-18",
+  "aberto": true,
+  "escalaRotulos": [
+    "Muito ruim",
+    "Ruim",
+    "Regular",
+    "Bom",
+    "Excelente"
+  ],
+  "secoes": [
+    {
+      "id": "identificacao",
+      "titulo": "Identificação",
+      "sub": "Opcional — pode pular sem responder.",
+      "perguntas": [
+        {
+          "id": "ident_nome",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Nome"
+        },
+        {
+          "id": "ident_cargo",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Área / cargo"
+        }
+      ]
+    },
+    {
+      "id": "pautas",
+      "titulo": "O Núcleo · As pautas",
+      "sub": "Como você avalia cada pauta deste módulo?",
+      "perguntas": [
+        {
+          "id": "p_dna",
+          "tipo": "escala",
+          "texto": "O DNA da sua Liderança"
+        },
+        {
+          "id": "p_autocuidado",
+          "tipo": "escala",
+          "texto": "Autocuidado, Energia e Longevidade"
+        },
+        {
+          "id": "p_decisao",
+          "tipo": "escala",
+          "texto": "Decisão sob Pressão"
+        },
+        {
+          "id": "p_foco",
+          "tipo": "escala",
+          "texto": "Foco no que Gera Resultado"
+        }
+      ]
+    },
+    {
+      "id": "conducao",
+      "titulo": "Condução, ritmo e aplicação",
+      "sub": "Como você avalia cada item?",
+      "perguntas": [
+        {
+          "id": "e_facilitador",
+          "tipo": "escala",
+          "texto": "Condução dos facilitadores"
+        },
+        {
+          "id": "e_ritmo",
+          "tipo": "escala",
+          "texto": "Ritmo e duração do módulo"
+        },
+        {
+          "id": "e_aplicabilidade",
+          "tipo": "escala",
+          "texto": "Aplicabilidade no seu dia a dia"
+        }
+      ]
+    },
+    {
+      "id": "percepcao",
+      "titulo": "Sequência e energia",
+      "sub": "Escolha uma opção em cada.",
+      "perguntas": [
+        {
+          "id": "seq_pautas",
+          "tipo": "opcao",
+          "texto": "Como você percebeu a sequência das pautas deste módulo?",
+          "opcoes": [
+            "Complementares, uma preparou a outra",
+            "Houve repetição de conteúdo entre elas",
+            "Faltou conexão entre as pautas",
+            "Não soube avaliar"
+          ]
+        },
+        {
+          "id": "energia_final",
+          "tipo": "opcao",
+          "texto": "Como você chegou ao final deste módulo?",
+          "opcoes": [
+            "Com energia, daria para seguir",
+            "Cansado, mas acompanhando bem",
+            "No limite, perdi o fio em alguns momentos",
+            "Exausto, rendi pouco na parte final"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "destaques",
+      "titulo": "Destaques do módulo",
+      "sub": "Escolha uma pauta em cada.",
+      "perguntas": [
+        {
+          "id": "pauta_top",
+          "tipo": "opcao",
+          "texto": "Qual pauta deste módulo mais valeu o seu tempo?",
+          "opcoes": [
+            "O DNA da sua Liderança",
+            "Autocuidado, Energia e Longevidade",
+            "Decisão sob Pressão",
+            "Foco no que Gera Resultado"
+          ]
+        },
+        {
+          "id": "pauta_encurtar",
+          "tipo": "opcao",
+          "texto": "Qual pauta você encurtaria?",
+          "opcoes": [
+            "O DNA da sua Liderança",
+            "Autocuidado, Energia e Longevidade",
+            "Decisão sob Pressão",
+            "Foco no que Gera Resultado",
+            "Nenhuma"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nps",
+      "titulo": "Nota do módulo",
+      "sub": "0–6 detrator · 7–8 neutro · 9–10 promotor",
+      "perguntas": [
+        {
+          "id": "nps_geral",
+          "tipo": "nps",
+          "texto": "De 0 a 10, que nota você dá para este módulo?",
+          "min": "Não recomendaria",
+          "max": "Com certeza"
+        }
+      ]
+    },
+    {
+      "id": "comentario",
+      "titulo": "Comentário",
+      "sub": "Opcional.",
+      "perguntas": [
+        {
+          "id": "comentario",
+          "tipo": "texto",
+          "max": 1000,
+          "texto": "O que mais te marcou e o que podemos melhorar neste módulo?"
+        }
+      ]
+    },
+    {
+      "id": "alimentacao",
+      "titulo": "Alimentação",
+      "sub": null,
+      "perguntas": [
+        {
+          "id": "al_coffee",
+          "tipo": "escala",
+          "texto": "Qualidade do coffee break de sexta"
+        },
+        {
+          "id": "al_tempo",
+          "tipo": "escala",
+          "texto": "Tempo disponível para o intervalo"
+        }
+      ]
+    },
+    {
+      "id": "estrutura",
+      "titulo": "Estrutura e acolhimento",
+      "sub": "Ainda dá tempo de ajustar para amanhã.",
+      "perguntas": [
+        {
+          "id": "es_sala",
+          "tipo": "escala",
+          "texto": "Sala, som, projeção e climatização"
+        },
+        {
+          "id": "es_recepcao",
+          "tipo": "escala",
+          "texto": "Recepção e atendimento da equipe"
+        }
+      ]
+    }
+  ]
+}
