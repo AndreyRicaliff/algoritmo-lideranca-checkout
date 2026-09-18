@@ -56,6 +56,9 @@ function resumo(rows, roteiro) {
     sessoes,
     comentariosN,
     idNps: idNps || null,
+    // rótulo de TODA pergunta, inclusive as de texto — o painel precisa saber de qual
+    // pergunta aberta veio cada resposta quando o roteiro tem mais de uma
+    rotulos: meta,
     enps: geral && geral.enps !== undefined ? geral.enps : null,
     secoes: secoes.map((s) => ({
       id: s.id, titulo: s.titulo,

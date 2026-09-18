@@ -266,22 +266,32 @@
     // não devolve a sessão do comentário nem o horário da identificação (migration 20260817).
     // Aqui só não se reintroduz o vínculo — nem por autor, nem por ordem, nem por relógio.
     html += '<div class="secao card">' +
-      '<h2 style="font-size:16px;margin:0 0 2px">Comentários</h2>' +
-      '<p class="metodo" style="margin:0 0 10px">Anônimos — sem vínculo com quem se identificou.</p>';
+      '<h2 style="font-size:16px;margin:0 0 2px">Respostas abertas</h2>' +
+      '<p class="metodo" style="margin:0 0 10px">Anônimas — sem vínculo com quem se identificou.</p>';
+    // Identificação é o que começa com ident_; todo o resto é texto anônimo — inclusive
+    // perguntas abertas que o roteiro do dia tenha além do comentário. O banco segue a
+    // mesma regra (migration 20260918d), então nada aqui reintroduz o vínculo.
     var comentarios = [];
     var porSessao = {};
     (d.textos || []).forEach(function (t) {
-      if (t.pergunta_id === 'comentario') comentarios.push(t);
-      else (porSessao[t.sessao] = porSessao[t.sessao] || {})[t.pergunta_id] = t;
+      if (t.pergunta_id.indexOf('ident_') === 0) {
+        (porSessao[t.sessao] = porSessao[t.sessao] || {})[t.pergunta_id] = t;
+      } else {
+        comentarios.push(t);
+      }
     });
     if (comentarios.length) {
+      var rotulos = d.rotulos || {};
       comentarios.forEach(function (c) {
         // só a data: o horário exato entregaria quem respondeu em qual momento da sala
+        var deQual = c.pergunta_id !== 'comentario' && rotulos[c.pergunta_id]
+          ? esc(rotulos[c.pergunta_id]) + ' · ' : '';
         html += '<div class="comentario">' + esc(c.texto) +
-          '<div class="quando num">' + new Date(c.criado).toLocaleDateString('pt-BR') + '</div></div>';
+          '<div class="quando num">' + deQual +
+          new Date(c.criado).toLocaleDateString('pt-BR') + '</div></div>';
       });
     } else {
-      html += '<p class="metodo">Nenhum comentário ainda.</p>';
+      html += '<p class="metodo">Nenhuma resposta aberta ainda.</p>';
     }
     var identificados = Object.keys(porSessao)
       .filter(function (s) { return porSessao[s].ident_nome; })
