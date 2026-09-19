@@ -34,6 +34,7 @@ if (!Array.isArray(r.secoes) || !r.secoes.length) erros.push('secoes: vazio');
 
 const ids = new Map();
 let nNps = 0;
+let nPrincipal = 0;
 let nPerguntas = 0;
 for (const s of r.secoes || []) {
   if (!s.id || !s.titulo) erros.push(`seção "${s.id || '?'}": precisa de id e titulo`);
@@ -67,11 +68,21 @@ for (const s of r.secoes || []) {
       erros.push(`pergunta "${q.id}": só pergunta do tipo opcao pode ter "opcoes"`);
     }
     if (q.tipo === 'nps') nNps++;
+    if (q.principal === true) {
+      nPrincipal++;
+      if (q.tipo !== 'nps') erros.push(`pergunta "${q.id}": só pergunta nps pode ser principal`);
+    }
     if (!q.texto) erros.push(`pergunta "${q.id}": sem texto`);
   }
 }
 if (nNps === 0) erros.push('nenhuma pergunta tipo "nps" — a pesquisa não teria eNPS');
-if (nNps > 1) erros.push(`${nNps} perguntas tipo "nps" — o painel só usa a primeira`);
+// Mais de um 0-10 é legítimo (nota do módulo E recomendação do treinamento, por exemplo),
+// mas só um deles é o eNPS do produto. Sem dizer qual, o painel escolheria pela ordem —
+// e a ordem é acidente de diagramação, não decisão de medição.
+if (nNps > 1 && nPrincipal !== 1) {
+  erros.push(`${nNps} perguntas tipo "nps": marque exatamente uma com "principal": true ` +
+    '(é ela que vira o eNPS; hoje ' + nPrincipal + ' marcada(s))');
+}
 
 if (erros.length) {
   console.error('roteiro inválido:\n' + erros.map((e) => '  - ' + e).join('\n'));

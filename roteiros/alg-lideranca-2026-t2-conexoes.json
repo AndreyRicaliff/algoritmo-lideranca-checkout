@@ -1,0 +1,188 @@
+{
+  "evento": "alg-lideranca-2026-t2-conexoes",
+  "titulo": "Avaliação · Módulo As Conexões",
+  "subtitulo": "O líder e o time · Menos de 2 minutos. Resposta anônima (identificação opcional).",
+  "periodo": "19/09/2026 · manhã",
+  "dia": "2026-09-19",
+  "aberto": true,
+  "escalaRotulos": [
+    "Muito ruim",
+    "Ruim",
+    "Regular",
+    "Bom",
+    "Excelente"
+  ],
+  "secoes": [
+    {
+      "id": "identificacao",
+      "titulo": "Identificação",
+      "sub": "Opcional — pode pular sem responder.",
+      "perguntas": [
+        {
+          "id": "ident_nome",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Nome"
+        },
+        {
+          "id": "ident_cargo",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Área / cargo"
+        }
+      ]
+    },
+    {
+      "id": "pautas",
+      "titulo": "As Conexões · As pautas",
+      "sub": "Como você avalia cada pauta deste módulo?",
+      "perguntas": [
+        {
+          "id": "p_presenca",
+          "tipo": "escala",
+          "texto": "Presença e Influência"
+        },
+        {
+          "id": "p_conversas",
+          "tipo": "escala",
+          "texto": "Conversas Difíceis, Relações Fortes"
+        },
+        {
+          "id": "p_feedback",
+          "tipo": "escala",
+          "texto": "Feedback que Desenvolve"
+        },
+        {
+          "id": "p_conflito",
+          "tipo": "escala",
+          "texto": "Do Conflito ao Acordo"
+        }
+      ]
+    },
+    {
+      "id": "conducao",
+      "titulo": "Condução, ritmo e aplicação",
+      "sub": "Como você avalia cada item?",
+      "perguntas": [
+        {
+          "id": "e_facilitador",
+          "tipo": "escala",
+          "texto": "Condução dos facilitadores"
+        },
+        {
+          "id": "e_ritmo",
+          "tipo": "escala",
+          "texto": "Ritmo e duração do módulo"
+        },
+        {
+          "id": "e_aplicabilidade",
+          "tipo": "escala",
+          "texto": "Aplicabilidade no seu dia a dia"
+        }
+      ]
+    },
+    {
+      "id": "percepcao",
+      "titulo": "Sequência e energia",
+      "sub": "Escolha uma opção em cada.",
+      "perguntas": [
+        {
+          "id": "seq_pautas",
+          "tipo": "opcao",
+          "texto": "Como você percebeu a sequência das pautas deste módulo?",
+          "opcoes": [
+            "Complementares, uma preparou a outra",
+            "Houve repetição de conteúdo entre elas",
+            "Faltou conexão entre as pautas",
+            "Não soube avaliar"
+          ]
+        },
+        {
+          "id": "energia_final",
+          "tipo": "opcao",
+          "texto": "Como você chegou ao final deste módulo?",
+          "opcoes": [
+            "Com energia, daria para seguir",
+            "Cansado, mas acompanhando bem",
+            "No limite, perdi o fio em alguns momentos",
+            "Exausto, rendi pouco na parte final"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "destaques",
+      "titulo": "Destaques do módulo",
+      "sub": "Escolha uma pauta em cada.",
+      "perguntas": [
+        {
+          "id": "pauta_top",
+          "tipo": "opcao",
+          "texto": "Qual pauta deste módulo mais valeu o seu tempo?",
+          "opcoes": [
+            "Presença e Influência",
+            "Conversas Difíceis, Relações Fortes",
+            "Feedback que Desenvolve",
+            "Do Conflito ao Acordo"
+          ]
+        },
+        {
+          "id": "pauta_encurtar",
+          "tipo": "opcao",
+          "texto": "Qual pauta você encurtaria?",
+          "opcoes": [
+            "Presença e Influência",
+            "Conversas Difíceis, Relações Fortes",
+            "Feedback que Desenvolve",
+            "Do Conflito ao Acordo",
+            "Nenhuma"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nota",
+      "titulo": "Nota do módulo",
+      "sub": "0–6 detrator · 7–8 neutro · 9–10 promotor",
+      "perguntas": [
+        {
+          "id": "nps_geral",
+          "tipo": "nps",
+          "texto": "De 0 a 10, que nota você dá para este módulo?",
+          "min": "Muito ruim",
+          "max": "Excelente"
+        }
+      ]
+    },
+    {
+      "id": "comentario",
+      "titulo": "Comentário",
+      "sub": "Opcional.",
+      "perguntas": [
+        {
+          "id": "comentario",
+          "tipo": "texto",
+          "max": 1000,
+          "texto": "O que mais te marcou e o que podemos melhorar neste módulo?"
+        }
+      ]
+    },
+    {
+      "id": "alimentacao",
+      "titulo": "Alimentação",
+      "sub": null,
+      "perguntas": [
+        {
+          "id": "al_coffee",
+          "tipo": "escala",
+          "texto": "Qualidade do coffee break da manhã de sábado"
+        },
+        {
+          "id": "al_tempo",
+          "tipo": "escala",
+          "texto": "Tempo disponível para o intervalo"
+        }
+      ]
+    }
+  ]
+}

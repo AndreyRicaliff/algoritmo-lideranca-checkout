@@ -1,0 +1,231 @@
+{
+  "evento": "alg-lideranca-2026-t2-escala",
+  "titulo": "Avaliação · Módulo A Escala",
+  "subtitulo": "O líder e a organização · Cerca de 2 minutos. Resposta anônima (identificação opcional).",
+  "periodo": "19/09/2026 · noite",
+  "dia": "2026-09-19",
+  "aberto": true,
+  "escalaRotulos": [
+    "Muito ruim",
+    "Ruim",
+    "Regular",
+    "Bom",
+    "Excelente"
+  ],
+  "secoes": [
+    {
+      "id": "identificacao",
+      "titulo": "Identificação",
+      "sub": "Opcional — pode pular sem responder.",
+      "perguntas": [
+        {
+          "id": "ident_nome",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Nome"
+        },
+        {
+          "id": "ident_cargo",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Área / cargo"
+        }
+      ]
+    },
+    {
+      "id": "pautas",
+      "titulo": "A Escala · As pautas",
+      "sub": "Como você avalia cada pauta deste módulo?",
+      "perguntas": [
+        {
+          "id": "p_time",
+          "tipo": "escala",
+          "texto": "Formando o Time"
+        },
+        {
+          "id": "p_cultura",
+          "tipo": "escala",
+          "texto": "Cultura e Clima Organizacional"
+        },
+        {
+          "id": "p_visao",
+          "tipo": "escala",
+          "texto": "Visão Estratégica"
+        },
+        {
+          "id": "p_vendedor",
+          "tipo": "escala",
+          "texto": "O Líder Vendedor"
+        },
+        {
+          "id": "p_cafe",
+          "tipo": "escala",
+          "texto": "Bônus · C.A.F.E. com Dados"
+        }
+      ]
+    },
+    {
+      "id": "conducao",
+      "titulo": "Condução, ritmo e aplicação",
+      "sub": "Como você avalia cada item?",
+      "perguntas": [
+        {
+          "id": "e_facilitador",
+          "tipo": "escala",
+          "texto": "Condução dos facilitadores"
+        },
+        {
+          "id": "e_ritmo",
+          "tipo": "escala",
+          "texto": "Ritmo e duração do módulo"
+        },
+        {
+          "id": "e_aplicabilidade",
+          "tipo": "escala",
+          "texto": "Aplicabilidade no seu dia a dia"
+        }
+      ]
+    },
+    {
+      "id": "percepcao",
+      "titulo": "Sequência e energia",
+      "sub": "Escolha uma opção em cada.",
+      "perguntas": [
+        {
+          "id": "seq_pautas",
+          "tipo": "opcao",
+          "texto": "Como você percebeu a sequência das pautas deste módulo?",
+          "opcoes": [
+            "Complementares, uma preparou a outra",
+            "Houve repetição de conteúdo entre elas",
+            "Faltou conexão entre as pautas",
+            "Não soube avaliar"
+          ]
+        },
+        {
+          "id": "energia_final",
+          "tipo": "opcao",
+          "texto": "Como você chegou ao final deste módulo?",
+          "opcoes": [
+            "Com energia, daria para seguir",
+            "Cansado, mas acompanhando bem",
+            "No limite, perdi o fio em alguns momentos",
+            "Exausto, rendi pouco na parte final"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "destaques",
+      "titulo": "Destaques do módulo",
+      "sub": "Escolha uma pauta em cada.",
+      "perguntas": [
+        {
+          "id": "pauta_top",
+          "tipo": "opcao",
+          "texto": "Qual pauta deste módulo mais valeu o seu tempo?",
+          "opcoes": [
+            "Formando o Time",
+            "Cultura e Clima Organizacional",
+            "Visão Estratégica",
+            "O Líder Vendedor",
+            "Bônus · C.A.F.E. com Dados"
+          ]
+        },
+        {
+          "id": "pauta_encurtar",
+          "tipo": "opcao",
+          "texto": "Qual pauta você encurtaria?",
+          "opcoes": [
+            "Formando o Time",
+            "Cultura e Clima Organizacional",
+            "Visão Estratégica",
+            "O Líder Vendedor",
+            "Bônus · C.A.F.E. com Dados",
+            "Nenhuma"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nota",
+      "titulo": "Nota do módulo",
+      "sub": "0–6 detrator · 7–8 neutro · 9–10 promotor",
+      "perguntas": [
+        {
+          "id": "nps_geral",
+          "tipo": "nps",
+          "texto": "De 0 a 10, que nota você dá para este módulo?",
+          "min": "Muito ruim",
+          "max": "Excelente"
+        }
+      ]
+    },
+    {
+      "id": "comentario",
+      "titulo": "Comentário",
+      "sub": "Opcional.",
+      "perguntas": [
+        {
+          "id": "comentario",
+          "tipo": "texto",
+          "max": 1000,
+          "texto": "O que mais te marcou e o que podemos melhorar neste módulo?"
+        }
+      ]
+    },
+    {
+      "id": "alimentacao",
+      "titulo": "Alimentação",
+      "sub": null,
+      "perguntas": [
+        {
+          "id": "al_almoco",
+          "tipo": "escala",
+          "texto": "Qualidade do almoço"
+        },
+        {
+          "id": "al_tempo_almoco",
+          "tipo": "escala",
+          "texto": "Tempo disponível para almoçar"
+        },
+        {
+          "id": "al_coffee",
+          "tipo": "escala",
+          "texto": "Qualidade do coffee break da tarde de sábado"
+        }
+      ]
+    },
+    {
+      "id": "bonus_formato",
+      "titulo": "Formato do bônus no intervalo",
+      "sub": "Escolha uma opção.",
+      "perguntas": [
+        {
+          "id": "bonus_formato",
+          "tipo": "opcao",
+          "texto": "Como funcionou o bônus durante o coffee break?",
+          "opcoes": [
+            "Funcionou bem, consegui acompanhar e me servir",
+            "Interessante, mas me dividi entre acompanhar e fazer o intervalo",
+            "Preferia o intervalo livre, sem conteúdo",
+            "Preferia o bônus como pauta separada, fora do intervalo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "com_alimentacao",
+      "titulo": "Alimentação e intervalos",
+      "sub": "Opcional.",
+      "perguntas": [
+        {
+          "id": "com_alimentacao",
+          "tipo": "texto",
+          "max": 500,
+          "texto": "Comentário sobre alimentação e intervalos"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+{
+  "evento": "alg-lideranca-2026-t2-bonus",
+  "titulo": "Avaliação Final · Módulo Bônus e Fechamento",
+  "subtitulo": "Última coleta. Cerca de 3 minutos. Aqui você avalia o módulo bônus, os materiais e a experiência completa.",
+  "periodo": "20/09/2026",
+  "dia": "2026-09-20",
+  "aberto": true,
+  "escalaRotulos": [
+    "Muito ruim",
+    "Ruim",
+    "Regular",
+    "Bom",
+    "Excelente"
+  ],
+  "secoes": [
+    {
+      "id": "identificacao",
+      "titulo": "Identificação",
+      "sub": "Opcional — pode pular sem responder.",
+      "perguntas": [
+        {
+          "id": "ident_nome",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Nome"
+        },
+        {
+          "id": "ident_cargo",
+          "tipo": "texto",
+          "max": 120,
+          "texto": "Área / cargo"
+        }
+      ]
+    },
+    {
+      "id": "pautas",
+      "titulo": "Bônus · A pauta",
+      "sub": "Como você avalia a pauta deste módulo?",
+      "perguntas": [
+        {
+          "id": "p_ia",
+          "tipo": "escala",
+          "texto": "IA para a Gestão"
+        }
+      ]
+    },
+    {
+      "id": "conducao",
+      "titulo": "Condução, ritmo e aplicação",
+      "sub": "Como você avalia cada item?",
+      "perguntas": [
+        {
+          "id": "e_facilitador",
+          "tipo": "escala",
+          "texto": "Condução dos facilitadores"
+        },
+        {
+          "id": "e_ritmo",
+          "tipo": "escala",
+          "texto": "Ritmo e duração do módulo"
+        },
+        {
+          "id": "e_aplicabilidade",
+          "tipo": "escala",
+          "texto": "Aplicabilidade no seu dia a dia"
+        }
+      ]
+    },
+    {
+      "id": "percepcao",
+      "titulo": "Energia",
+      "sub": "Escolha uma opção.",
+      "perguntas": [
+        {
+          "id": "energia_final",
+          "tipo": "opcao",
+          "texto": "Como você chegou ao final deste módulo?",
+          "opcoes": [
+            "Com energia, daria para seguir",
+            "Cansado, mas acompanhando bem",
+            "No limite, perdi o fio em alguns momentos",
+            "Exausto, rendi pouco na parte final"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pratica",
+      "titulo": "Prática e estrutura técnica",
+      "sub": null,
+      "perguntas": [
+        {
+          "id": "pratica_guiada",
+          "tipo": "escala",
+          "texto": "Prática guiada (mão na massa)"
+        },
+        {
+          "id": "estrutura_tecnica",
+          "tipo": "escala",
+          "texto": "Estrutura técnica (Wi-Fi, tomadas, equipamentos)"
+        }
+      ]
+    },
+    {
+      "id": "nota_modulo",
+      "titulo": "Nota do módulo bônus",
+      "sub": "0–6 detrator · 7–8 neutro · 9–10 promotor",
+      "perguntas": [
+        {
+          "id": "nps_modulo",
+          "tipo": "nps",
+          "texto": "De 0 a 10, que nota você dá para este módulo?",
+          "min": "Muito ruim",
+          "max": "Excelente"
+        }
+      ]
+    },
+    {
+      "id": "comentario",
+      "titulo": "Comentário sobre o módulo",
+      "sub": "Opcional.",
+      "perguntas": [
+        {
+          "id": "comentario",
+          "tipo": "texto",
+          "max": 1000,
+          "texto": "O que mais te marcou e o que podemos melhorar neste módulo?"
+        }
+      ]
+    },
+    {
+      "id": "alimentacao",
+      "titulo": "Alimentação",
+      "sub": null,
+      "perguntas": [
+        {
+          "id": "al_coffee",
+          "tipo": "escala",
+          "texto": "Qualidade do coffee break de domingo"
+        },
+        {
+          "id": "al_tempo",
+          "tipo": "escala",
+          "texto": "Tempo disponível para o intervalo"
+        }
+      ]
+    },
+    {
+      "id": "materiais",
+      "titulo": "Materiais",
+      "sub": null,
+      "perguntas": [
+        {
+          "id": "m_apostila",
+          "tipo": "escala",
+          "texto": "Qualidade da apostila"
+        },
+        {
+          "id": "m_clareza",
+          "tipo": "escala",
+          "texto": "Clareza e organização do conteúdo"
+        },
+        {
+          "id": "m_utilidade",
+          "tipo": "escala",
+          "texto": "Utilidade para o dia a dia"
+        }
+      ]
+    },
+    {
+      "id": "experiencia",
+      "titulo": "Experiência geral",
+      "sub": "O treinamento inteiro, não só hoje.",
+      "perguntas": [
+        {
+          "id": "x_logistica",
+          "tipo": "escala",
+          "texto": "Organização e logística"
+        },
+        {
+          "id": "x_atendimento",
+          "tipo": "escala",
+          "texto": "Atendimento da equipe AG"
+        },
+        {
+          "id": "x_distribuicao",
+          "tipo": "escala",
+          "texto": "Distribuição dos dias e módulos"
+        },
+        {
+          "id": "x_networking",
+          "tipo": "escala",
+          "texto": "Networking com os outros participantes"
+        },
+        {
+          "id": "x_investimento",
+          "tipo": "escala",
+          "texto": "Relação entre o investimento e o que você recebeu"
+        }
+      ]
+    },
+    {
+      "id": "modulo_top",
+      "titulo": "O treinamento inteiro",
+      "sub": "Escolha um módulo.",
+      "perguntas": [
+        {
+          "id": "modulo_top",
+          "tipo": "opcao",
+          "texto": "Considerando o treinamento inteiro, qual módulo entregou mais valor para você?",
+          "opcoes": [
+            "O Núcleo — o líder por dentro",
+            "As Conexões — o líder e o time",
+            "A Escala — o líder e a organização",
+            "Bônus — IA para a Gestão"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "recomendacao",
+      "titulo": "Recomendação",
+      "sub": "0–6 detrator · 7–8 neutro · 9–10 promotor",
+      "perguntas": [
+        {
+          "id": "nps_geral",
+          "tipo": "nps",
+          "principal": true,
+          "texto": "De 0 a 10, o quanto você recomendaria este treinamento a um colega?",
+          "min": "Não recomendaria",
+          "max": "Com certeza"
+        }
+      ]
+    },
+    {
+      "id": "fechamento",
+      "titulo": "Fechamento",
+      "sub": "As duas primeiras ajudam mais que qualquer nota.",
+      "perguntas": [
+        {
+          "id": "faltou_pra_10",
+          "tipo": "texto",
+          "max": 1000,
+          "texto": "O que faltou para essa nota ser 10? (se você deu 10, o que faríamos para superar)"
+        },
+        {
+          "id": "pratica_segunda",
+          "tipo": "texto",
+          "max": 1000,
+          "texto": "O que você vai colocar em prática na segunda-feira?"
+        },
+        {
+          "id": "diria_colega",
+          "tipo": "texto",
+          "max": 1000,
+          "texto": "Se um colega perguntasse sobre esse treinamento, o que você diria a ele? (opcional)"
+        }
+      ]
+    },
+    {
+      "id": "depoimento",
+      "titulo": "Depoimento",
+      "sub": "Escolha uma opção.",
+      "perguntas": [
+        {
+          "id": "depoimento_ok",
+          "tipo": "opcao",
+          "texto": "Podemos usar sua resposta acima como depoimento?",
+          "opcoes": [
+            "Sim, com meu nome e empresa",
+            "Sim, mas sem identificação",
+            "Prefiro não"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -30,10 +30,12 @@ function resumo(rows, roteiro) {
   const secoes = (roteiro && roteiro.secoes) || [];
   const meta = {};
   const opcoes = {};
+  let principal = null;
   for (const s of secoes) {
     for (const q of s.perguntas) {
       meta[q.id] = q.texto;
       if (Array.isArray(q.opcoes)) opcoes[q.id] = q.opcoes;
+      if (q.principal === true && q.tipo === 'nps') principal = q.id;
     }
   }
 
@@ -57,9 +59,12 @@ function resumo(rows, roteiro) {
     q.texto = meta[id] || id;
   }
 
-  // eNPS da pesquisa = o da primeira pergunta tipo 'nps' do roteiro. Não fixa mais o id
-  // 'nps_geral': cada dia pode nomear a sua como quiser.
-  const idNps = Object.keys(perguntas).find((id) => perguntas[id].tipo === 'nps');
+  // eNPS da pesquisa = a pergunta marcada como principal no roteiro. Uma pesquisa pode ter
+  // mais de um 0-10 (nota do módulo E recomendação do treinamento): sem a marcação, o painel
+  // elegeria pela ordem do roteiro, que é acidente de diagramação. Sem marcação nenhuma
+  // (pesquisa com um 0-10 só), cai na única que existe.
+  const idNps = (principal && perguntas[principal] ? principal : null) ||
+    Object.keys(perguntas).find((id) => perguntas[id].tipo === 'nps');
   const geral = idNps ? perguntas[idNps] : null;
 
   return {
