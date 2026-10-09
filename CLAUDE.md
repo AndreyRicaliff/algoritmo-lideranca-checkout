@@ -25,6 +25,13 @@ lead page e qualquer coisa que chegue a olho humano (decidido pelo Ricaliff em 1
 - `/qr` monta o QR a partir do dominio em que a propria pagina esta aberta (`location.origin`):
   abrir o cartaz no dominio certo ja gera o QR certo, nao ha dominio hardcoded a manter.
 
+## Hub `educacao.agconsultorialtda.com` (09/10/2026)
+
+O dono centralizou pagamentos e pesquisas da AG Educação neste projeto, em `educacao.agconsultorialtda.com`.
+`/arquitetura-de-vendas/*` e rewrite EXTERNO para o projeto `arquitetura-vendas-checkout` (repo separado);
+`/algoritmo-da-lideranca` e atalho interno para `/`. Rota nova do hub: so acrescentar no `vercel.json`,
+nunca trocar a raiz nem `/pesquisa`, `/qr`, `/resultados`. Detalhe no README e na ADR de 09/10.
+
 ## Estado (18/08/2026)
 
 Auditado em todas as refs, inclusive a branch `backup/pre-format-2026-07-10`: **zero chave de

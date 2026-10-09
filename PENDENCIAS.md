@@ -9,6 +9,12 @@
   falha na cobrança devolve 502 com texto cru em vez de redirecionar pro WhatsApp. O código de
   fallback existe e está morto até a env var existir — toda venda que falha é perdida sem rastro.
 
+- **2026-10-09 — `algoritmo.agconsultorialtda.com` não resolve (NXDOMAIN em 1.1.1.1 e 8.8.8.8).** O
+  domínio segue cadastrado no projeto Vercel, mas o registro sumiu da zona da Cloudflare — no mesmo dia em
+  que `educacao.agconsultorialtda.com` entrou. É o domínio canônico deste CLAUDE.md (QR, links,
+  lead page): todo link/QR impresso com ele está quebrado. Decidir (só Ricaliff): recriar o CNAME
+  `algoritmo` → `cname.vercel-dns.com`, ou declarar `educacao` o canônico e atualizar o CLAUDE.md.
+
 ## 🟠 Abertas
 
 - **2026-09-18 — Derrubar o login legado por evento depois da 2ª turma.** `nps_login(text,text,text)`
