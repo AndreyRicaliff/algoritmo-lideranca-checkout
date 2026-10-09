@@ -62,6 +62,21 @@ Status: `lead` → `aguardando_pagamento` → `pago` (ou `erro_cobranca`).
 - `POST /customers` → `id`; `POST /payments` (PIX `value`; cartão `installmentCount`+`totalValue`) → `invoiceUrl`
 - Webhook `{ event, payment }`; idempotente; responder 2xx.
 
+## Hub AG Educação — `educacao.agconsultorialtda.com` (desde 09/10/2026)
+
+Este projeto Vercel também responde em `educacao.agconsultorialtda.com`, o endereço único de pagamentos e
+pesquisas da AG Educação. O `vercel.json` só **acrescenta** rotas; tudo o que já existia continua igual.
+
+| Caminho no hub | O que serve |
+|---|---|
+| `/` | página e checkout do Algoritmo da Liderança (como sempre) |
+| `/algoritmo-da-lideranca` | atalho para a mesma página (rewrite interno, simetria com a rota abaixo) |
+| `/pesquisa`, `/qr`, `/resultados` | pesquisa de avaliação (seção abaixo), para qualquer evento via `?e=<slug>` |
+| `/arquitetura-de-vendas` e `/arquitetura-de-vendas/*` | checkout da imersão Arquitetura de Vendas: rewrite **externo** para `arquitetura-vendas-checkout.vercel.app` (outro projeto, outro repo). Página, assets e API passam pelo proxy |
+
+O outro projeto serve o app dele sob o mesmo prefixo, com URLs absolutas `/arquitetura-de-vendas/...`; por
+isso o caminho é repassado inteiro e nada daqui depende do código de lá.
+
 ## Pesquisa de avaliação (eNPS)
 
 Uma pesquisa por dia de evento, cada uma com roteiro próprio.

@@ -180,3 +180,20 @@ acento aplicada por ele chega corrompida** — use o SQL Editor do Supabase ou m
 código: o canal de deploy de migration corrompia UTF-8, então a exceção gravada no banco não
 era byte-idêntica ao literal comparado no Node. Troquei comparação de mensagem por SQLSTATE —
 identidade de erro é contrato, e contrato não pode depender de encoding sobreviver à viagem."
+
+## 2026-10-09 — [infra] Hub educacao.agconsultorialtda.com por rewrite externo, não por fusão de repos
+**Problema:** o dono quer pagamentos e pesquisas da AG Educação num endereço só,
+`educacao.agconsultorialtda.com`, já ligado a este projeto. O checkout da Arquitetura de Vendas é outro
+projeto Vercel, com chave e deploy próprios, e já está em produção (inclusive dentro de iframe no site).
+**Opções:** A) copiar o checkout da Arquitetura para cá; B) rewrite externo de `/arquitetura-de-vendas/*`
+para o `vercel.app` do outro projeto, que serve o próprio app sob o mesmo prefixo; C) redirect para o
+`vercel.app` (troca o endereço na barra do navegador).
+**Decisão:** B. **Por quê:** o endereço fica no hub sem juntar código, chave nem deploy de dois produtos
+(um repo é público, o outro não); o caminho é repassado inteiro, então página, assets, API e até redirect
+relativo de lá voltam para o lugar certo. C não centraliza nada; A duplica motor de preço que já diverge.
+**Consequências:** o hub depende do `vercel.app` do outro projeto estar no ar; uma URL sem prefixo no HTML
+de lá quebraria só aqui (o outro repo tem teste para isso). O POST de inscrição também passa pelo proxy
+(provado com o honeypot, sem criar cobrança). `/algoritmo-da-lideranca` virou atalho interno para `/` por simetria; a raiz não muda.
+**Em entrevista (30s):** "Dois produtos, um domínio, zero código compartilhado. O hub faz proxy de um
+prefixo para o outro projeto, que serve o app sob o mesmo prefixo. Assim cada um mantém deploy, chave e
+repositório próprios e o usuário vê um endereço só."

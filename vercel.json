@@ -1,4 +1,9 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/algoritmo-da-lideranca", "destination": "/" },
+    { "source": "/arquitetura-de-vendas", "destination": "https://arquitetura-vendas-checkout.vercel.app/arquitetura-de-vendas" },
+    { "source": "/arquitetura-de-vendas/:path*", "destination": "https://arquitetura-vendas-checkout.vercel.app/arquitetura-de-vendas/:path*" }
+  ]
 }
