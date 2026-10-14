@@ -1,6 +1,7 @@
 // GET /api/preco — tabela de preços vigente (lote + parcelas com taxa já embutida).
 // O front consome daqui em vez de replicar a regra: é o mesmo módulo que a cobrança usa.
 // Dado público (nenhum segredo), por isso CORS liberado — a leadpage roda em outro domínio.
+// Inscrições encerradas = 200 com { encerrado: true } (estado da oferta, não falha da API).
 
 const preco = require('../lib/preco.js');
 

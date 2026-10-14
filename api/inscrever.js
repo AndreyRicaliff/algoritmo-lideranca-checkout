@@ -1,6 +1,8 @@
 // Vercel Serverless Function — cria cliente + cobrança no Asaas e redireciona pro checkout.
 // A chave Asaas vive SÓ em env var (nunca no front/repo): definir no painel Vercel.
 // Preço, lote e taxas vêm de lib/preco.js — o mesmo módulo que alimenta o front.
+// Sem lote vigente (inscrições encerradas) responde 410 antes de ler o form: a lead page do
+// WordPress é cópia estática e continua fazendo POST aqui muito depois de a turma acabar.
 //
 // Env vars (Settings -> Environment Variables):
 //   ASAAS_API_KEY          (obrigatória)  chave $aact_... — use a de SANDBOX para testar
@@ -13,6 +15,7 @@
 const preco = require('../lib/preco.js');
 
 const DESCRICAO = 'Inscrição – Algoritmo da Liderança (2ª turma · 18 a 20/09/2026)';
+const ENCERRADO = 'As inscrições desta turma foram encerradas. Para a próxima turma, fale com a AG no WhatsApp: (83) 99966-1686.';
 const DIAS_VENCIMENTO = 3;
 
 function baseUrl() {
@@ -114,6 +117,10 @@ function precoDivergente(d, base) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).send('Method Not Allowed'); return; }
 
+  // Decidido uma vez por requisição: o lote que valida o preço é o mesmo que cobra.
+  const lote = preco.loteVigente();
+  if (!lote) { res.status(410).send(ENCERRADO); return; }
+
   const d = lerCampos(await readBody(req));
   const erro = invalido(d);
   if (erro) { res.status(400).send(erro + ' Volte e corrija para continuar.'); return; }
@@ -123,7 +130,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const lote = preco.loteVigente();
     if (precoDivergente(d, lote.base)) {
       res.status(409).send('O valor da inscrição foi atualizado. Recarregue a página para ver a condição vigente.');
       return;

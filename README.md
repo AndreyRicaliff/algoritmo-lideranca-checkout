@@ -69,7 +69,7 @@ pesquisas da AG Educação. O `vercel.json` só **acrescenta** rotas; tudo o que
 
 | Caminho no hub | O que serve |
 |---|---|
-| `/` | página e checkout do Algoritmo da Liderança (como sempre) |
+| `/` | página e checkout do Algoritmo da Liderança (como sempre). **Inscrições encerradas desde 21/09/2026**: a data vive em `lib/preco.js` (último lote); turma nova = novo lote lá |
 | `/algoritmo-da-lideranca` | atalho para a mesma página (rewrite interno, simetria com a rota abaixo) |
 | `/pesquisa`, `/qr`, `/resultados` | pesquisa de avaliação (seção abaixo), para qualquer evento via `?e=<slug>` |
 | `/arquitetura-de-vendas` e `/arquitetura-de-vendas/*` | checkout da imersão Arquitetura de Vendas: rewrite **externo** para `arquitetura-vendas-checkout.vercel.app` (outro projeto, outro repo). Página, assets e API passam pelo proxy |
