@@ -57,7 +57,7 @@
     var enviar = function () { fbq('track', 'Purchase', evento); };
     fetch('https://algoritmo.agconsultorialtda.com/api/preco')
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-      .then(function (t) { evento.value = t.base; }) // aproxima pelo PIX/boleto, o caso dominante
+      .then(function (t) { if (t.base) evento.value = t.base; }) // PIX/boleto, o caso dominante; encerrado = sem base
       .catch(function () {})
       .then(enviar);
   })();

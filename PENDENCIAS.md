@@ -3,19 +3,29 @@
 ## 🔴 Críticas
 
 - **2026-07-15 — Rotacionar a chave de produção do Asaas.** Foi compartilhada por chat e
-  confirmada ativa em 15/07; o repositório é público desde então. Rotacionar no Asaas e atualizar
-  `ASAAS_API_KEY` no Vercel. (Só Ricaliff pode fazer.)
+  confirmada ativa em 15/07; o repositório é público desde então. **Exposta de novo em 09/10/2026**
+  (registro no hub privado). Rotacionar no Asaas e atualizar `ASAAS_API_KEY` no Vercel no mesmo
+  minuto — a chave velha morre na hora, e até a env nova entrar toda cobrança falha. (Só Ricaliff.)
 - **2026-07-15 — `WHATSAPP_FALLBACK` não está setada no Vercel.** Verificado por requisição real:
   falha na cobrança devolve 502 com texto cru em vez de redirecionar pro WhatsApp. O código de
   fallback existe e está morto até a env var existir — toda venda que falha é perdida sem rastro.
+  Reconfirmada ausente em 11/10/2026. Setar antes de abrir a próxima turma.
 
 - **2026-10-09 — `algoritmo.agconsultorialtda.com` não resolve (NXDOMAIN em 1.1.1.1 e 8.8.8.8).** O
   domínio segue cadastrado no projeto Vercel, mas o registro sumiu da zona da Cloudflare — no mesmo dia em
   que `educacao.agconsultorialtda.com` entrou. É o domínio canônico deste CLAUDE.md (QR, links,
   lead page): todo link/QR impresso com ele está quebrado. Decidir (só Ricaliff): recriar o CNAME
   `algoritmo` → `cname.vercel-dns.com`, ou declarar `educacao` o canônico e atualizar o CLAUDE.md.
+  Reconfirmado em 11/10: a lead page publicada no WordPress tem `action` e `fetch` em `algoritmo.`,
+  então hoje o form dela nem chega à API (erro de DNS no navegador). A escolha arrasta o WordPress
+  junto: ou o CNAME volta, ou todo link/QR/form de lá passa para `educacao.`.
 
 ## 🟠 Abertas
+
+- **2026-10-14 — Republicar a lead page do WordPress com o `apps-script/leadpage.html` atual.** A
+  cópia publicada é anterior ao painel "Inscrições encerradas": quando a API voltar a responder
+  (item de DNS acima), ela recebe `{ encerrado: true }`, cai em "consulte" e, ao enviar, mostra o 410
+  em texto cru. A venda já está fechada no backend; o que falta é a página de lá dizer isso bonito.
 
 - **2026-09-18 — Derrubar o login legado por evento depois da 2ª turma.** `nps_login(text,text,text)`
   e `nps_sessao_valida(text,uuid)` continuam no banco, junto com as colunas `nps_config.login_user`,

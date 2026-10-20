@@ -197,3 +197,24 @@ de lá quebraria só aqui (o outro repo tem teste para isso). O POST de inscriç
 **Em entrevista (30s):** "Dois produtos, um domínio, zero código compartilhado. O hub faz proxy de um
 prefixo para o outro projeto, que serve o app sob o mesmo prefixo. Assim cada um mantém deploy, chave e
 repositório próprios e o usuário vê um endereço só."
+
+## 2026-10-14 — [preço] Oferta vencida fecha pela data do último lote, não por página "encerrada" à mão
+**Problema:** 21 dias depois da 2ª turma (18-20/09) o checkout seguia vendendo a R$ 1.977 com
+cobrança real no Asaas: o último lote tinha `ate: null` e `loteVigente` caía nele para sempre.
+**Opções:** A) trocar o HTML por uma página "inscrições encerradas" (estático — a lead page do
+WordPress continuaria fazendo POST na API) · B) flag/env `INSCRICOES_ABERTAS` (abrir e fechar exige
+deploy ou painel, e esquece do mesmo jeito) · C) o `ate` do último lote vira a data de encerramento:
+sem lote vigente, `/api/preco` devolve `{ encerrado: true }`, `/api/inscrever` responde 410 antes de
+ler o form, e os dois fronts trocam o form pelo painel de encerramento a partir da mesma resposta.
+**Decisão:** C. **Por quê:** "o que a página mostra vem da API" já era a regra (ADR de 27/07);
+encerramento é só mais um estado dela. O guarda fica no backend, o único lugar que a cópia estática
+do WordPress alcança — página nova não fecha um form publicado em outro domínio. Abrir a 3ª turma =
+acrescentar um lote com data, sem reaprender nada.
+**Consequências:** `loteVigente` devolve `null` fora de qualquer lote (antes, o último lote):
+esquecer de cadastrar o lote seguinte agora **fecha** a venda em vez de vender no preço antigo — para
+evento com data, é o erro barato. O front antigo do WordPress (sem o painel) cai em "consulte" e
+recebe o 410 em texto ao enviar; precisa ser republicado com o `apps-script/leadpage.html` atual.
+**Em entrevista (30s):** "Oferta com data de fim é dado, não página. Pus a data no mesmo módulo que
+decide o preço, fiz o backend recusar fora dela e o front só reage ao estado que a API devolve —
+assim a cópia estática publicada em outro domínio também para de vender, porque o guarda não está
+no HTML."

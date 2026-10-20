@@ -8,6 +8,9 @@
   2. Imagens: as de assets/ são os criativos sociais (placeholder visual). Suba as imagens
      reais da página na Biblioteca de Mídia do WordPress e troque os src.
   3. Pixel: o site já dispara PageView nativo.
+  4. Turma encerrada também vem da API ({ encerrado: true }): o form dá lugar ao painel
+     "Inscrições encerradas" sozinho — não editar esta página quando a turma fechar. Mas a
+     cópia publicada no WordPress é estática: republicar esta versão para ela ganhar o painel.
 -->
 <style>
   .alg {
@@ -68,15 +71,20 @@
   .alg .submit { width:100%; padding:15px; font:inherit; font-size:16px; font-weight:700;
     color:var(--accent-ink); background:var(--accent); border:0; border-radius:10px; cursor:pointer; transition:filter .15s; }
   .alg .submit:hover { filter:brightness(.96); }
+  .alg a.submit { display:block; text-align:center; text-decoration:none; }
+  .alg [hidden] { display:none !important; }
 
-  @media (max-width:760px){ .alg .split,.alg .grid3,.alg .grid4{ grid-template-columns:1fr; } .alg section{ padding:48px 0; } }
+  .alg .split-hero { align-items:start; grid-template-columns:1.2fr .8fr; }
+  /* .split-hero entra aqui porque era style inline e vencia a media query: no celular o hero
+     ficava em duas colunas e o form/painel espremido em ~115px */
+  @media (max-width:760px){ .alg .split,.alg .split-hero,.alg .grid3,.alg .grid4{ grid-template-columns:1fr; } .alg section{ padding:48px 0; } }
 </style>
 
 <div class="alg">
 
   <!-- HERO + FORM -->
   <section>
-    <div class="wrap split" style="align-items:start;grid-template-columns:1.2fr .8fr">
+    <div class="wrap split split-hero">
       <div>
         <span class="eyebrow">AG Educação · 2ª Turma 2026</span>
         <h1 style="font-size:clamp(28px,4.4vw,46px)"><span style="white-space:nowrap">Liderança não é dom.</span><br><span class="gold">É algoritmo.</span></h1>
@@ -118,6 +126,14 @@
         <input type="hidden" name="precoVisto" id="alg-preco-visto" value="indisponivel">
         <button type="submit" class="submit">Garantir minha vaga</button>
       </form>
+
+      <!-- Estado "inscrições encerradas": a API decide, nunca o HTML estático -->
+      <div id="alg-encerrado" class="checkout" hidden>
+        <div class="inaugural">2ª Turma · 18 a 20 de setembro</div>
+        <h3 style="font-size:20px;margin:0 0 4px">Inscrições encerradas</h3>
+        <p style="color:var(--muted);font-size:14px;margin:0 0 16px">A 2ª turma já aconteceu. Quer uma vaga na próxima? Fale com a AG e entre na lista de espera.</p>
+        <a class="submit" href="https://wa.me/5583999661686" target="_blank" rel="noopener">Falar com a AG no WhatsApp</a>
+      </div>
     </div>
   </section>
 
@@ -148,7 +164,7 @@
     <div class="wrap">
       <h2>O próximo líder da sua empresa<br>pode estar nesta turma.</h2>
       <p class="lead">Você não precisa esperar o próximo ciclo de crescimento. Construa-o agora. 2ª Turma 2026 · 18, 19 e 20 de setembro · 30 vagas.</p>
-      <p style="margin-top:18px"><a href="#alg-inscricao" style="color:#b9851f;font-weight:700;text-decoration:none">Preencher inscrição ↑</a></p>
+      <p style="margin-top:18px"><a id="alg-cta" href="#alg-inscricao" style="color:#b9851f;font-weight:700;text-decoration:none">Preencher inscrição ↑</a></p>
     </div>
   </section>
 
@@ -183,7 +199,18 @@
     const visto = document.getElementById('alg-preco-visto');
     let tabela = null;
 
+    // Oferta vencida: o form some e entra o painel de encerramento. Se a API falhar, o form
+    // fica (estado "consulte") e o backend recusa a inscrição com 410 — fail-closed na cobrança.
+    function encerrado() {
+      form.hidden = true;
+      document.getElementById('alg-encerrado').hidden = false;
+      const cta = document.getElementById('alg-cta');
+      cta.href = '#alg-encerrado';
+      cta.textContent = 'Inscrições encerradas · falar com a AG ↑';
+    }
+
     function aplicar(t) {
+      if (t.encerrado) { encerrado(); return; }
       tabela = t;
       document.getElementById('alg-pix').textContent = brl(t.base);
       if (t.proximaBase && t.ate) {
