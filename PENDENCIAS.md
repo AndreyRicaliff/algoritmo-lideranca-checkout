@@ -1,7 +1,7 @@
 # Pendências
 
-> Este repositório é público. Pendência de segurança (credencial, caminho de exploração, defesa
-> ainda aberta) não entra aqui: vai no registro privado da AG (regra do `CLAUDE.md`).
+> Este repositório é público. Pendência de segurança não entra aqui: vai no registro privado da
+> AG (regra do `CLAUDE.md`).
 
 ## 🔴 Críticas
 
