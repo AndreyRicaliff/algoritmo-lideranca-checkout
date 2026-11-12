@@ -85,8 +85,8 @@ Falha no Asaas ──▶ redireciona p/ WhatsApp (não perde a venda)
 5. **Confirmar o 13º módulo** (landing lista 12; plano diz 13).
 
 ## 9. Segurança / LGPD
-- Chave Asaas só nas Propriedades do Script (nunca no front/git). A chave de **produção** foi
-  compartilhada por chat → **rotacionar após o go-live**.
+- Chave Asaas só em env var / Propriedades do Script (nunca no front/git). Pendência sobre a
+  chave fica no registro privado da AG, não neste repo público.
 - Testar em **sandbox** antes de produção (a chave atual de produção cobra de verdade).
 - Form com checkbox de consentimento + link à política. Não logar CPF/pagamento em claro.
 

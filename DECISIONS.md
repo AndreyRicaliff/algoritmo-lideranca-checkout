@@ -218,3 +218,31 @@ recebe o 410 em texto ao enviar; precisa ser republicado com o `apps-script/lead
 decide o preço, fiz o backend recusar fora dela e o front só reage ao estado que a API devolve —
 assim a cópia estática publicada em outro domínio também para de vender, porque o guarda não está
 no HTML."
+
+## 2026-11-12 — [deploy] O domínio público serve só o que o navegador usa
+**Problema:** sem `.vercelignore`, o Vercel publicava o repositório inteiro: em 12/11 o domínio
+respondia 200 para 18 arquivos internos (`PENDENCIAS.md`, `CLAUDE.md`, `DECISIONS.md`,
+`GUIA-API-ASAAS.md`, `docs/`, `supabase/migrations/*`, `roteiros/`, `scripts/`, `apps-script/Codigo.gs`).
+Nenhum tinha chave ou PII, mas juntos davam o mapa da operação, e o PENDENCIAS tinha itens que, pela
+regra deste repo público, moram no registro privado da AG. A resposta também não trazia nenhum header
+de segurança além do HSTS.
+**Opções:** A) tornar o repo privado (não resolve o domínio, que serve o deploy, não o GitHub) ·
+B) mover o site para `public/` (mexe em todo caminho relativo e no `require('../lib/...')` das funções) ·
+C) `.vercelignore` por lista de exclusão, no padrão do `ag-converge` (ADR de 20/10 de lá).
+**Decisão:** C, com `apps-script/` só **em parte**: o `index.html` carrega `apps-script/assets/*.png` e
+o link da Política de Privacidade (LGPD) do formulário aponta para `apps-script/politica-de-privacidade.html`.
+Saem só `Codigo.gs` e a cópia-fonte da lead page. `api/` e `lib/` ficam (as funções importam `lib/`).
+Headers em `vercel.json`: `frame-ancestors` limitado ao próprio domínio e ao site da AG (nenhuma página
+deste projeto é embutida em iframe hoje; o checkout em iframe é o da Arquitetura, no `vercel.app` dele),
+`nosniff`, `Referrer-Policy` e `Permissions-Policy`. O prefixo `/arquitetura-de-vendas` fica de fora da
+regra: é proxy para outro projeto, que responde pelos próprios headers (ADR de 09/10).
+**Por quê:** lista de exclusão é a menor mudança que fecha o vazamento sem mover arquivo; a exceção do
+`apps-script/` veio de ler o que o HTML referencia, não do nome da pasta. CSP com `script-src` ficou de
+fora: as 4 páginas têm script inline e o ganho não paga o risco de quebrar o painel sem teste no navegador.
+**Consequências:** arquivo novo na raiz que não for para o navegador precisa entrar no `.vercelignore`
+(o padrão é publicar). O `X-XSS-Protection` do `ag-converge` não foi copiado: navegador atual ignora e a
+recomendação da OWASP é não mandar. Histórico do Git não reescrito: a mudança vale da ponta em diante.
+**Em entrevista (30s):** "Hospedagem estática publica tudo que está na pasta. Medi o que o domínio
+respondia, vi 18 arquivos internos servidos e fechei com uma lista de exclusão. Antes de excluir a pasta
+do Apps Script, li o que o HTML referenciava: ela tinha a política de privacidade do formulário, e
+excluir por nome de pasta teria tirado do ar um requisito da LGPD."
