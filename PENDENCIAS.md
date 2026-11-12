@@ -1,11 +1,10 @@
 # Pendências
 
+> Este repositório é público. Pendência de segurança não entra aqui: vai no registro privado da
+> AG (regra do `CLAUDE.md`).
+
 ## 🔴 Críticas
 
-- **2026-07-15 — Rotacionar a chave de produção do Asaas.** Foi compartilhada por chat e
-  confirmada ativa em 15/07; o repositório é público desde então. **Exposta de novo em 09/10/2026**
-  (registro no hub privado). Rotacionar no Asaas e atualizar `ASAAS_API_KEY` no Vercel no mesmo
-  minuto — a chave velha morre na hora, e até a env nova entrar toda cobrança falha. (Só Ricaliff.)
 - **2026-07-15 — `WHATSAPP_FALLBACK` não está setada no Vercel.** Verificado por requisição real:
   falha na cobrança devolve 502 com texto cru em vez de redirecionar pro WhatsApp. O código de
   fallback existe e está morto até a env var existir — toda venda que falha é perdida sem rastro.
@@ -27,13 +26,6 @@
   (item de DNS acima), ela recebe `{ encerrado: true }`, cai em "consulte" e, ao enviar, mostra o 410
   em texto cru. A venda já está fechada no backend; o que falta é a página de lá dizer isso bonito.
 
-- **2026-09-18 — Derrubar o login legado por evento depois da 2ª turma.** `nps_login(text,text,text)`
-  e `nps_sessao_valida(text,uuid)` continuam no banco, junto com as colunas `nps_config.login_user`,
-  `login_senha` e `chave_stats`. Nada do código atual usa: a credencial mora em `nps_painel` desde
-  18/09. Foram mantidas de propósito **durante os dias do evento** para que um rollback do deploy no
-  Vercel volte a funcionar sem depender de migration. Passado 20/09, derrubar as duas funções e as
-  três colunas — enquanto existirem, há um caminho de autenticação paralelo vivo.
-
 - **2026-07-27 — Confirmar a taxa de antecipação do Asaas.** `ASAAS_ANTECIPACAO_AM` está em 1,99%
   a.m. por estimativa, não por leitura do extrato. Afeta todo preço de cartão. Conferir em
   Asaas → Configurações → Taxas e ajustar a env var (não precisa mexer em código).
@@ -47,10 +39,3 @@
   devolver objeto vazio. Não afeta o Vercel (que só enxerga o repositório), mas quebra teste
   local. Corrigir com um `package.json` `{"type":"commonjs"}` na raiz — mudança de build, merece
   deploy próprio, fora da janela de lançamento.
-- **2026-07-27 — Endpoint público sem rate limit.** `POST /api/inscrever` cria cliente + cobrança
-  na conta de produção sem nenhum limite, e não há CAPTCHA, honeypot nem idempotência. Confirmado
-  por revisão adversarial: um laço de POSTs com CPFs válidos (triviais de gerar) enche o painel de
-  clientes e cobranças reais. O Asaas rejeita CPF com dígito verificador inválido, o que barra
-  lixo trivial, mas não um ataque com CPFs bem-formados. Como o acompanhamento do lançamento é
-  feito pelo painel do Asaas, spam polui a única fonte de verdade. Mitigação: rate limit por IP +
-  honeypot no form + validar dígito verificador antes de chamar o Asaas.

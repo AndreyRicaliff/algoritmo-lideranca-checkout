@@ -1,0 +1,17 @@
+# Nada de documentação interna, migration nem script no ar (DECISIONS 2026-11-12).
+# Antes disto o domínio público servia PENDENCIAS.md, CLAUDE.md, migrations e o Apps Script.
+# api/ e lib/ ficam: as funções fazem require('../lib/preco.js') e require('../lib/nps.js').
+*.md
+docs/
+supabase/
+scripts/
+roteiros/
+GUIA-*
+package.json
+package-lock.json
+
+# apps-script/ NÃO sai inteiro: o index.html usa apps-script/assets/*.png e o link da
+# Política de Privacidade (LGPD) do formulário aponta para apps-script/politica-de-privacidade.html.
+# Sai só o código do Apps Script desativado e a cópia-fonte da lead page do WordPress.
+apps-script/*.gs
+apps-script/leadpage.html
