@@ -15,3 +15,6 @@ package-lock.json
 # Sai só o código do Apps Script desativado e a cópia-fonte da lead page do WordPress.
 apps-script/*.gs
 apps-script/leadpage.html
+
+# Estado do projeto no Trilho AG: lido do git pela Central AG, nunca pelo navegador (17/11/2026).
+trilho.json
